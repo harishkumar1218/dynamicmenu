@@ -1,0 +1,46 @@
+.Menu{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+    padding-bottom: 70px;
+}
+.menu-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 5%;
+
+}
+
+.Menu-nev{
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    color: black;
+    background-color: #727272;
+}
+
+
+.MenuScrollContainer {
+    display: flex;
+    max-width: 100%;
+    overflow-x: scroll;
+    max-height:fit-content;
+    overflow-y: hidden;
+    overflow-x: auto;
+    white-space: nowrap; 
+    flex: 0 0 auto;
+    
+  }
+  
+  .MenuScrollContainer::-webkit-scrollbar{
+   width: 0px;
+   height: 0px;
+  }
+
+  .active-tab{
+    color: red;
+    text-decoration: underline;
+  }

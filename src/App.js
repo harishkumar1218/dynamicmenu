@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
+import { LayoutPage } from "./Components/Layout";
+import { GoogleLogin } from "@react-oauth/google";
 
-function App() {
+import "@coreui/coreui/dist/css/coreui.min.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+
+
+const App = () => {
+  const [isLoggedIn,setIsLoggedIn]=useState(localStorage.getItem("isLoggedIn"));
+  
+  const handleLoginSuccess = (credentialResponse) => {
+    const decode = jwtDecode(credentialResponse?.credential);
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userDetails", JSON.stringify(decode));
+    setIsLoggedIn(true);
+  };
+
+  const handleLoginFailure = (error) => {
+    console.log("Login Failed", error);
+    localStorage.setItem("isLoggedIn", "false");
+  };
+
+
+  useEffect(()=>{
+    //rerendering if isLoggedin changed
+  },[isLoggedIn])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  
+  
+        <LayoutPage />
+       
+   
   );
-}
+};
 
 export default App;
