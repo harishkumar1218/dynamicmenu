@@ -6,10 +6,7 @@ import './location.css'
 
 const LocationComponent = ({ currentLocation }) => {
   return (
-    <div className="location-container">
-      <FaLocationDot/>
-      <div className="current-location">{currentLocation}</div>
-    </div>
+    <div></div>
   );
 }
 

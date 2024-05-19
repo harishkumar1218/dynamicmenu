@@ -46,6 +46,11 @@
   .button-container {
     display: flex;
     align-items: center;
+    border-radius: 10px;
+    justify-content: space-evenly;
+    width: 100px;
+    height: 45px;
+    background-color: #ff3c3c;
   }
   
   .button-container button {

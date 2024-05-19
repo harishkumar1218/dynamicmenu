@@ -8,6 +8,8 @@ import { FFooter } from "./FooterFolder/FooterItems";
 import { ScrollToTopOnPageChange } from "./ScrollToTop";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from './Temp';
+import LoginPage from './Authentication/LoginPage';
+import SignUpPage from './Authentication/SignUpPage';
 
 const data = {
   123:{
@@ -75,8 +77,9 @@ const LayoutPage = () => {
       <BrowserRouter>
           <ScrollToTopOnPageChange />
           <Routes>
-           
-            <Route exact path="/" element={<HomePage />} />
+          <Route exact path="/" element={<LoginPage />} />
+            <Route exact path="/signup" element={<SignUpPage />} />
+            <Route exact path="/home" element={<HomePage />} />
             <Route exact path="/menu" element={<FMenuNav />} />
             <Route exact path="/search" element={<FSearch />} />
             <Route exact path="/cart" element={<FCart />} />

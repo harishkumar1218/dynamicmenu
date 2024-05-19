@@ -1,4 +1,4 @@
-.Populer-card{
+.PopulerCard{
     display: flex;
     margin-right: 10px;
     flex-direction: column;
@@ -6,8 +6,8 @@
     align-items: center;
     height: 300px;
     width: 360px; 
-    box-shadow: 0 4px 6px rgb(200, 200, 200);
-    border-radius: 20px;
+    box-shadow: 0 2px 2px rgb(208, 208, 208);
+    border-radius:25px;
 }
 
 .Populer-scroll-container {
@@ -33,7 +33,7 @@
   }
 
   
-.Populer-card-content{
+.PopulerCardContent{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,9 +41,9 @@
     height: 100%;
     width: 100%;
     border-radius: 20px;
-  
 }
-.card-name{
+
+.cardName{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -51,23 +51,24 @@
     padding-left: 5%;
    
 }
-.card-footer {
+
+.cardFooter{
     display: flex;
     justify-content: space-between;
     align-items:center;
     width: 100%;
-    padding-top:  10px;
+    padding:  10px;
  
-    
   }
-  
- 
-  .left-content {
+
+  .leftContent {
     flex: 1;
     display: flex;
     align-items: center;
   }
+  
   .CardOverlay{
     background: linear-gradient(to top, #01010147, #2e2e2e00);
     border-radius: 0px 0px 20px 20px;
+    padding: 0%;
   }

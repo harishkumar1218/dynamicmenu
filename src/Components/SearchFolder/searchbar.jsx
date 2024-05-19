@@ -6,11 +6,17 @@ import { CNavbar, CInputGroup, CSpinner, CFormInput, CButton } from '@coreui/rea
 import './Search.css'
 
 
+
 const FSearch = () => {
   const [count, setCount] = useState(0);
   const [searchQueue, setSearchQueue] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
+  const suggetionList = ["Biryani", "Panipuri", "Pizza"];
+  const searchResultList = {
+    0: { catogory_id: 0, item_id: 12, name: "xyz", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy" },
+    1: { catogory_id: 1, item_id: 15, name: "abc", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy" }
+  };
 
   useEffect(() => {
     if (searchQueue) {
@@ -60,42 +66,47 @@ const FSearch = () => {
         </CNavbar>
       </div>
       {
-      (searchQueue == "" )?
-        (
-        <div>
-          <div style={{ paddingLeft: "5px" }}>Popular Searches</div>
-          <hr />
-          <div style={{ paddingLeft: "7px" }}>
-            <div onClick={() => { inputRef.current.value = "Biryani"; setSearchQueue("Biryani") }}><FaSearchengin /> Biryani</div>
-            <div onClick={() => { inputRef.current.value = "Panipuri"; setSearchQueue("Panipuri") }}><FaSearchengin /> Panipuri</div>
-            <div onClick={() => { inputRef.current.value = "Pizza"; setSearchQueue("Pizza") }}><FaSearchengin /> Pizza</div>
-          </div>
-        </div> 
-        ) : null
+        (searchQueue == "") ?
+          (
+            <div>
+              <div style={{ paddingLeft: "5px" }}>Popular Searches</div>
+              <hr />
+              <div style={{ paddingLeft: "7px" }}>
+                {suggetionList.map((val, ind) => (
+                  <div onClick={() => { inputRef.current.value = val; setSearchQueue(val) }}><FaSearchengin />{val}</div>
+                ))}
+              </div>
+            </div>
+          ) : null
       }
 
-      <div className="searchCard">
-          <img src={"https://rp-media.faasos.io/catalog/images/HNYSDPDQZPKU.jpeg?d=375&tr:w-0.5,h-0.5"} className="searchImage" alt="Card" />
-          <div className="searchCardDetails">
-            <h5>biryani</h5>
-            <p>jahjashuaj ah</p>
-          </div>
-          <div className="searchCardFooter">
-            <span>$55</span>
-              {
-                (count == 0 )? 
-                (
-                  <button className='AddButton' style={{ backgroundColor: "red" }} onClick={() => setCount(count + 1)}>Add</button>
-                ) : (
-                    <div className="button-container">
-                      <button onClick={handleDecrement}>-</button>
-                      <span>{count}</span>
-                      <button onClick={handleIncrement}>+</button>
-                    </div>
-                  )
-              }
-          </div>
-      </div>
+      {
+       Object.keys(searchResultList).map((key) => {
+          const item = searchResultList[key];
+          return (
+            <div className="searchCard">
+              <img src={"https://rp-media.faasos.io/catalog/images/HNYSDPDQZPKU.jpeg?d=375&tr:w-0.5,h-0.5"} className="searchImage" alt="Card" />
+              <div className="searchCardDetails">
+                <h5>{item.name}</h5>
+                <p>{item.discriptcs}</p>
+              </div>
+              <div className="searchCardFooter">
+                <span>${item.price}</span>
+                {
+                  (count == 0) ?
+                    (
+                      <button className='AddButton' style={{ backgroundColor: "red" }} onClick={() => setCount(count + 1)}>Add</button>
+                    ) : (
+                      <div className="button-container">
+                        <button onClick={handleDecrement}>-</button>
+                        <span>{count}</span>
+                        <button onClick={handleIncrement}>+</button>
+                      </div>
+                    )
+                }
+              </div>
+            </div>)
+        })};
     </div>
   );
 }

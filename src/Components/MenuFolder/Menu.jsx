@@ -20,11 +20,7 @@ const items = {
 const FMenuNav = () => {
 
     // const [items, setItems] = useState(initialItems);
-    let sectionRefs = useRef([]);
-    sectionRefs.current= Object.keys(catogorys).map(
-        (ref, index) =>   sectionRefs.current[index] = createRef()
-        )
-   
+    let sectionRefs = [useRef(null),useRef(null),useRef(null),useRef(null)]
     const [activeTab, setActiveTab] = useState(0);
     const navigationRef = useRef(null);
     const navigate = useNavigate();
@@ -122,7 +118,7 @@ const FMenuNav = () => {
             </div>
 
             <div className="menu-content" >
-                {Object.keys(catogorys).map((key, index) => {
+                {/* {Object.keys(catogorys).map((key, index) => {
                     const category = catogorys[key];
                     return (
                         <div key={category.id} ref={sectionRefs.current[index]} data-index={index}>
@@ -134,7 +130,7 @@ const FMenuNav = () => {
                             </div>
                         </div>
                     );
-                })}
+                })} */}
                 <div ref={sectionRefs[0]} data-index={0}>
                     <div style={{ textAlign: 'center' }}>------------Veg Pizza------------</div>
                     <div>
