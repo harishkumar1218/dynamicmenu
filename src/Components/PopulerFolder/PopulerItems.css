@@ -5,7 +5,7 @@
     justify-content: center;
     align-items: center;
     height: 300px;
-    width: 360px; 
+    width: 370px; 
     box-shadow: 0 2px 2px rgb(208, 208, 208);
     border-radius:25px;
 }
@@ -19,7 +19,7 @@
     white-space: nowrap; 
   }
   
-  .Populer-scroll-container .Populer-card {
+  .Populer-scroll-container .PopulerCard {
     display: flex;
     flex-wrap: nowrap; 
     padding: 0px; 
@@ -57,7 +57,7 @@
     justify-content: space-between;
     align-items:center;
     width: 100%;
-    padding:  10px;
+    padding:  5px;
  
   }
 

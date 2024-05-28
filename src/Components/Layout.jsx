@@ -70,16 +70,16 @@ const data = {
 
 export const CartContext = createContext();
 
-const LayoutPage = () => {
+const LayoutPage = () =>{
   const [cartData, setCartData] = useState(data);
   return (
     <CartContext.Provider value={{cartData,setCartData}}>
       <BrowserRouter>
           <ScrollToTopOnPageChange />
           <Routes>
-          <Route exact path="/" element={<LoginPage />} />
-            <Route exact path="/signup" element={<SignUpPage />} />
-            <Route exact path="/home" element={<HomePage />} />
+          {/* <Route exact path="/" element={<LoginPage />} />
+            <Route exact path="/signup" element={<SignUpPage />} /> */}
+            <Route exact path="/" element={<HomePage />} />
             <Route exact path="/menu" element={<FMenuNav />} />
             <Route exact path="/search" element={<FSearch />} />
             <Route exact path="/cart" element={<FCart />} />
@@ -89,5 +89,7 @@ const LayoutPage = () => {
     </CartContext.Provider>
   );
 };
+
+
 
 export { LayoutPage };

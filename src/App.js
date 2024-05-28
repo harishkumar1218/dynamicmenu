@@ -28,7 +28,7 @@ const App = () => {
     //rerendering if isLoggedin changed
   },[isLoggedIn])
   return (
-  
+
   
         <LayoutPage />
        

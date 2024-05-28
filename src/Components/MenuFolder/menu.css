@@ -5,12 +5,11 @@
     align-items: center; 
     padding-bottom: 70px;
 }
-.menu-content{
+.menuContent{
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding-left: 5%;
-
 }
 
 .Menu-nev{
