@@ -1,41 +1,71 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import "./PopulerItems.css"
 import { CCard, CCardImage, CCardTitle, CButton, CCardImageOverlay, CCardText, CPlaceholder, } from '@coreui/react'
-import useCachedFetch from '../../customhooksFolder/useFetch';
+import userEvent from '@testing-library/user-event';
 
 
-const FPopulerItems = ({ img }) => {
+const FPopulerItems = ( {itemList} ) => {
+  console.log("pop");
+  console.log(itemList);
 
-  const [count, setCount] = useState(0);
-  const cardRef=[useRef(null),useRef(null)];
+  const [populerList, setpopulerList] = useState({});
+  const [, setState] = useState();
+  const [cartItems, setcartItems] = useState({});
+  const forceUpdate = () => setState({});
+  const cardCountRefs = useRef([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const url = "https://jsonplaceholder.typicode.com/posts";
-  const { data, loading, error } = useCachedFetch(url);
+  
 
-  const populerList = {
-    0: { catogory_id: 0, item_id: 12, name: "xyz", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy",count:0 },
-    1: { catogory_id: 1, item_id: 15, name: "abc", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy",count:0 }
+  useLayoutEffect(() => {
+    setpopulerList(itemList);
+    if(populerList){
+      setLoading(false);
+    }
+  },[populerList]);
+  useLayoutEffect(() => {
+    if(populerList){
+    cardCountRefs.current = Object.keys(populerList).map((key, index) => cardCountRefs.current[index] || { count: 0 });
+    
+    }
+  }, [populerList, cartItems]);
+
+
+  console.log(populerList);
+
+  const handleIncrement = (index, key) => {
+    cardCountRefs.current[index].count += 1;
+    if (cartItems.hasOwnProperty(index)) {
+      cartItems[index].count++;
+      setcartItems(cartItems);
+    } else {
+      cartItems[index] = { ...populerList[index], count: 1 };
+    }
+    forceUpdate();
+
+
   };
 
- const cartItems={
-  0: { catogory_id: 0, item_id: 12, name: "xyz", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy",count:1 },
- };
+  const handleDecrement = (index, key) => {
+    if (cardCountRefs.current[index].count > 0) {
+      cardCountRefs.current[index].count -= 1;
+      if (index in cartItems) {
+        cartItems[index].count--;
+        if (cartItems[index].count <= 0) {
+          delete cartItems[index];
+        }
+        setcartItems(cartItems);
+      }
+      forceUpdate();
 
-  const handleIncrement = (key) => {
-    setCount(count + 1);
-  };
-
-  const handleDecrement = (key) => {
-    if (count > 0) {
-      setCount(count - 1);
     }
   };
 
 
-  
-
   return (
-    (loading) ?
+    (loading && populerList==null ) ?
       (
         <div>
           <div className='scroll-container' style={{ overflowX: 'auto', whiteSpace: 'nowrap', padding: "10px 10px 0px 20px" }}>
@@ -46,38 +76,41 @@ const FPopulerItems = ({ img }) => {
       ) : (
 
         <div className='scroll-container' style={{ overflowX: 'auto', whiteSpace: 'nowrap', padding: "10px 10px 0px 20px" }}>
-          {Object.keys(populerList).map((key) => {
+
+          {Object.keys(populerList).map((key, index) => {
             const item = populerList[key];
+            if (!cardCountRefs.current[index]) {
+              cardCountRefs.current[index] = { ref: null, count: 0 };
+            }
+            const count = cardCountRefs.current[index].count;
             return (
-              <div style={{ borderRadius: "20px" }}>
+              <div key={index} ref={(el) => (cardCountRefs.current[index].ref = el)} style={{ borderRadius: "20px" }}>
                 <CCard className="PopulerCard" style={{ display: "inline-block", color: 'white' }}>
-                  <CCardImage className="PopulerCard" src={item.imgUrl} />
+                  <CCardImage className="PopulerCard" src={item?.imgUrl} />
                   <CCardImageOverlay className='CardOverlay'>
                     <div className="PopulerCardContent">
                       <div className='cardName'>
-                        <CCardTitle >{item.name}</CCardTitle>
+                        <CCardTitle>{item?.name}</CCardTitle>
                       </div>
                       <div className="cardFooter">
-                        <CCardText className="leftContent" style={{ display: 'inline-block', verticalAlign: 'middle' }}>${item.price}</CCardText>
+                        <CCardText className="leftContent" style={{ display: 'inline-block', verticalAlign: 'middle' }}>${item?.price}</CCardText>
                         {
-                          (count == 0) ?
-                            (
-                              <CButton className='button-container' style={{backgroundColor:"red", borderRadius:"12px"}} color="danger" onClick={() => setCount(count + 1)}>Add +</CButton>
-
-                            ) : (
-                              <div className="button-container">
-                                <button style={{backgroundColor:"transparent"}} onClick={handleDecrement}>-</button>
-                                <span>{count}</span>
-                                <button style={{backgroundColor:"transparent"}} onClick={handleIncrement}>+</button>
-                              </div>
-                            )
+                          (count === 0) ? (
+                            <CButton className='button-container' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(index)}>Add +</CButton>
+                          ) : (
+                            <div className="button-container">
+                              <button style={{ backgroundColor: "transparent" }} onClick={() => handleDecrement(index, key)}>-</button>
+                              <span>{count}</span>
+                              <button style={{ backgroundColor: "transparent" }} onClick={() => handleIncrement(index, key)}>+</button>
+                            </div>
+                          )
                         }
                       </div>
                     </div>
                   </CCardImageOverlay>
                 </CCard>
               </div>
-            )
+            );
           })}
         </div>
 

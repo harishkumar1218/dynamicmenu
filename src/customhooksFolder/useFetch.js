@@ -1,6 +1,6 @@
 import { useState,useLayoutEffect } from 'react';
-
-function useCachedFetch(url, options = {}, cacheTime = 300000) {
+import axios from 'axios';
+function useCachedFetch(url, sendObj = {}, cacheTime = 300000) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,10 +13,15 @@ function useCachedFetch(url, options = {}, cacheTime = 300000) {
       try {
         let cachedData = getCachedData(url);
         const cacheValid = isCacheValid(url);
-
+      
         if (!cachedData || !cacheValid) {
-          const response = await fetch(url, options);
-          const newData = await response.json();
+          const response = await axios.post('http://localhost:5000/data', sendObj, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const newData =response.data;
           cachedData = newData;
           setCachedData(url, newData);
           setCacheExpiry(url);
@@ -39,7 +44,7 @@ function useCachedFetch(url, options = {}, cacheTime = 300000) {
     return () => {
       isMounted = false;
     };
-  }, [url, options]);
+  }, [url, sendObj]);
 
   return { data, loading, error };
 }

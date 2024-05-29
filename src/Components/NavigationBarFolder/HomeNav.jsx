@@ -71,7 +71,7 @@ const FNavbar = () => {
               <div className="current-location">{currentLocation}</div>
             </div>
             <CNavbarBrand href="#" style={{ fontFamily: 'Roboto, sans-serif' }} >{restorentName}</CNavbarBrand>
-            <CAvatar ref={avaterRef} src={localStorage.getItem("userDetails") == "" ? "https://coreui.io/react/docs/static/1-34eedf58c0876517e8587997f9625944.jpg" : samp.picture} />
+            <CAvatar ref={avaterRef} src={localStorage.getItem("userDetails") == "" ? "https://coreui.io/react/docs/static/1-34eedf58c0876517e8587997f9625944.jpg" : "https://coreui.io/react/docs/static/1-34eedf58c0876517e8587997f9625944.jpg"} />
           </CContainer>
         </CNavbar>
       </div>

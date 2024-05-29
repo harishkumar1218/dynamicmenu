@@ -32,7 +32,7 @@
 
 .card-title{
   font-size: 14px;
-  
+  text-align: center;
 }
 
 .CartcardImage{
@@ -53,6 +53,8 @@
   object-fit: cover; 
   box-shadow: 0 4px 6px rgb(128, 128, 128); 
 }
+
+
 
 .scroll-container {
   padding-left: 30px;

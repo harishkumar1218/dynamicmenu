@@ -18,14 +18,8 @@ function Tmp() {
           'Content-Type': 'application/json'
         }
       });
-      const response2 = await axios.post('http://localhost:5000/cart', data2, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
       console.log('Response from Flask:', response.data);
-      console.log('Response from Flask:', response2.data);
+    
     } catch (error) {
       console.error('Error sending data to Flask:', error);
     }
