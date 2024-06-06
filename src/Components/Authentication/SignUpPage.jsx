@@ -4,6 +4,7 @@ import { Link, useNavigate} from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa6';
 import useCachedFetch from '../../customhooksFolder/useFetch';
 import axios from 'axios';
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 function SignUpPage() {
@@ -51,6 +52,7 @@ function SignUpPage() {
               });
               
               console.log(response);
+            navigator("/home");
 
             if (response.status==200) {
                 console.log('User registered successfully');
@@ -88,7 +90,7 @@ function SignUpPage() {
               if (response.status==200) {
                 console.log('User registered successfully');
                 localStorage.setItem("isLoggedIn", "true");
-                nav("/home")
+                navigator("/home")
 
             } else {
                 const errorData = await response.json();
