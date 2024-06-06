@@ -44,7 +44,7 @@ function SignUpPage() {
         console.log(formData);
         try {
 
-            const response =  await axios.post('http://localhost:5000/auth', formData, {
+            const response =  await axios.post('https://dynamicmenu.onrender.com/auth', formData, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
