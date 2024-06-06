@@ -68,6 +68,41 @@ function SignUpPage() {
         }
     };
 
+    const login = useGoogleLogin({
+          onSuccess: async (tokenResponse) => {
+            try {
+              const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+                headers: {
+                  Authorization: `Bearer ${tokenResponse.access_token}`,
+                },
+              });
+      
+              const userProfile = userInfoResponse.data;
+
+              const response =  await axios.post('https://dynamicmenu.onrender.com/auth', userProfile, {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (response.status==200) {
+                console.log('User registered successfully');
+                localStorage.setItem("isLoggedIn", "true");
+                nav("/home")
+
+            } else {
+                const errorData = await response.json();
+                console.error('Registration failed:', errorData);
+            }
+            
+            } catch (error) {
+              console.error('Failed to fetch user profile', error);
+            }
+          },
+          scope: 'profile email',
+        });
+      
+
     return (
         <div className='authBody'>
         <div className="containerAuthFluid">
