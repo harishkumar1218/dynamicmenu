@@ -1,4 +1,9 @@
-npm install @coreui/react @coreui/coreui
-npm install react-icons --save
-npm install @react-oauth/google@latest
-npm install jwt-decode
+bson==0.5.10
+Flask==2.1.2
+Flask-Cors==4.0.1
+Flask-SQLAlchemy==2.5.1
+fuzzywuzzy==0.18.0
+pymongo==4.7.2
+scipy==1.9.3
+numpy==1.22.4
+pandas==1.4.3
