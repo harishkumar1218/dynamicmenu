@@ -13,7 +13,7 @@ function Tmp() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/data', data, {
+      const response = await axios.post('https://dynamicmenu.onrender.com/data', data, {
         headers: {
           'Content-Type': 'application/json'
         }
