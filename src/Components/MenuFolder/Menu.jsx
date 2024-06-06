@@ -152,7 +152,7 @@ const FMenuNav = ({ name = 'Default Name'}) => {
             action: "sort"
         };
         try {
-            const response = await axios.post("http://localhost:5000/home", sortRequest, {
+            const response = await axios.post("https://dynamicmenu.onrender.com/home", sortRequest, {
               headers: {
                 'Content-Type': 'application/json'
               }
