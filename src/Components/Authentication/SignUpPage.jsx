@@ -99,7 +99,7 @@ function SignUpPage() {
 
                             <div className="d-flex flex-row mt-3 mb-5">
                                 <a href="#!" className="btn btn-link m-3" style={{ color: 'white' }}>
-                                    <FaGoogle />
+                                     <FaGoogle onClick={()=>login()} />
                                 </a>
                             </div>
 
