@@ -22,7 +22,8 @@
     "webpack": "^5.91.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start-frontend":"react-scripts start",
+    "start": "concurrently \"npm run start-frontend\" \"python app.py\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

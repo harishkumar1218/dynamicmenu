@@ -1,5 +1,6 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 import { FaPercent,FaBuildingColumns } from "react-icons/fa6";
+import useCachedFetch from '../customhooksFolder/useFetch';
 
 
 const InvoiceItem = ({ item }) => {
@@ -16,27 +17,42 @@ const InvoiceItem = ({ item }) => {
 
 
 const Invoice = () => {
+
+  const [bill, setBill] = useState([]);
+  const billRequest = {
+    inputs:
+    {
+        restaurant_id: "66378cd6bed0587fd82cabb3",
+        user: "hari"
+    },
+    action: "bill"
+}
+  const { data: billData, loading: billLoading, error: billError } = useCachedFetch("data", billRequest);
+    useEffect(() => {
+        if (billData) setBill(billData);
+    }, [billData]);
  
 
 
   return (
     <div style={{backgroundColor:"white",padding:"10px",margin:"0px 5px" ,borderRadius:"20px",border: "1px solid #ccc"}}>
-    <div className='card-footer'>
+
+    <div className='cardFooter'>
         <h5>Subtotal</h5>
-        <div>109.00</div>
+        <div>{bill.total}</div>
     </div>
-    <div className='card-footer'>
+    <div className='cardFooter'>
         <div><FaPercent/> Discount</div>
-        <div style={{color:"green"}}>-8.00</div>
+        <div style={{color:"green"}}>{bill.discount}%</div>
     </div>
-    <div className='card-footer'>
+    <div className='cardFooter'>
         <div><FaBuildingColumns/> Tax and Charges</div>
-        <div>25.00</div>
+        <div>{bill.GST}</div>
     </div>
     <hr />
-    <div className='card-footer'>
+    <div className='cardFooter'>
         <div>Grand Total</div>
-        <div>588.00</div>
+        <div>{bill.total-bill.discount-bill.GST}</div>
     </div>
     </div>
   );

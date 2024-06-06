@@ -1,22 +1,39 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { FaSearchengin } from "react-icons/fa6";
+import { FaIndianRupeeSign, FaSearchengin } from "react-icons/fa6";
 import { CNavbar, CInputGroup, CSpinner, CFormInput, CButton } from '@coreui/react'
 
 import './Search.css'
+import useCachedFetch from '../../customhooksFolder/useFetch';
 
 
 
 const FSearch = () => {
-  const [count, setCount] = useState(0);
+
   const [searchQueue, setSearchQueue] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null);
   const suggetionList = ["Biryani", "Panipuri", "Pizza"];
-  const searchResultList = {
-    0: { catogory_id: 0, item_id: 12, name: "xyz", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy" },
-    1: { catogory_id: 1, item_id: 15, name: "abc", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99, discriptcs: "chisee and spisy" }
-  };
+  const [searchResult, setSearch] = useState([]);
+  const [, setState] = useState();
+  const [cartItems, setcartItems] = useState({});
+  const forceUpdate = () => setState({});
+  const cardCountRefs = useRef({});
+
+  const searchRequest = {
+    inputs:
+    {
+      restaurant_id: "66378cd6bed0587fd82cabb3",
+      user: "hari"
+    },
+    action: "search"
+  }
+
+  const { data: searchData, loading: searchLoading, error: searchError } = useCachedFetch("data", searchRequest);
+  useEffect(() => {
+    if (searchData) setSearch(searchData);
+  }, [searchData]);
+
 
   useEffect(() => {
     if (searchQueue) {
@@ -36,14 +53,30 @@ const FSearch = () => {
   }, [searchQueue]);
 
 
-  const handleIncrement = () => {
-    setCount(count + 1);
+  const handleIncrement = (index) => {
+    cardCountRefs.current[index].count += 1;
+    if (cartItems.hasOwnProperty(index)) {
+      cartItems[index].count++;
+      setcartItems(cartItems);
+    } else {
+      cartItems[index] = { ...searchResult[index], count: 1 };
+    }
+    forceUpdate();
   };
 
-  const handleDecrement = () => {
-    if (count > 0) {
-      setCount(count - 1);
+  const handleDecrement = (index) => {
+    if (cardCountRefs.current[index].count > 0) {
+      cardCountRefs.current[index].count -= 1;
+      if (index in cartItems) {
+        cartItems[index].count--;
+        if (cartItems[index].count <= 0) {
+          delete cartItems[index];
+        }
+        setcartItems(cartItems);
+      }
+      forceUpdate();
     }
+
   };
 
   const handleInputChange = (e) => {
@@ -77,36 +110,40 @@ const FSearch = () => {
                 ))}
               </div>
             </div>
-          ) : null
-      }
+          ) :
 
-      {
-       Object.keys(searchResultList).map((key) => {
-          const item = searchResultList[key];
-          return (
-            <div className="searchCard">
-              <img src={"https://rp-media.faasos.io/catalog/images/HNYSDPDQZPKU.jpeg?d=375&tr:w-0.5,h-0.5"} className="searchImage" alt="Card" />
-              <div className="searchCardDetails">
-                <h5>{item.name}</h5>
-                <p>{item.discriptcs}</p>
+
+
+          searchResult.map((value, index) => {
+
+            const item = value;
+            if (!cardCountRefs.current[index]) {
+              cardCountRefs.current[index] = { ref: null, count: 0 };
+            }
+            const count = cardCountRefs.current[index].count;
+            return (
+              <div className="searchCard">
+                <img src={item.img_url} className="searchImage" alt="Card" />
+                <div className="searchCardDetails">
+                  <h3>{item.name}</h3>
+                  <p>{item.type}</p>
+                </div>
+                <div className="searchCardFooter">
+                  <span style={{ fontWeight: "bold" }}><FaIndianRupeeSign />{item.price}</span>
+                  {(count === 0) ? (
+                    <CButton className='AddButton' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(index)}>Add +</CButton>
+                  ) : (
+                    <div style={{ color: "white", height: "40px" }} className="button-container">
+                      <button style={{ backgroundColor: "transparent" }} onClick={() => handleDecrement(index)}>-</button>
+                      <span>{count}</span>
+                      <button style={{ backgroundColor: "transparent" }} onClick={() => handleIncrement(index)}>+</button>
+                    </div>
+                  )
+                  }
+                </div>
               </div>
-              <div className="searchCardFooter">
-                <span>${item.price}</span>
-                {
-                  (count == 0) ?
-                    (
-                      <button className='AddButton' style={{ backgroundColor: "red" }} onClick={() => setCount(count + 1)}>Add</button>
-                    ) : (
-                      <div className="button-container">
-                        <button onClick={handleDecrement}>-</button>
-                        <span>{count}</span>
-                        <button onClick={handleIncrement}>+</button>
-                      </div>
-                    )
-                }
-              </div>
-            </div>)
-        })};
+            )
+          })}
     </div>
   );
 }

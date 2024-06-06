@@ -7,45 +7,40 @@ function useCachedFetch(url, sendObj = {}, cacheTime = 300000) {
   const [error, setError] = useState(null);
 
   useLayoutEffect(() => {
-    let isMounted = true;
+   
     const fetchData = async () => {
       setLoading(true);
-
       try {
-        let cachedData = getCachedData(url);
-        const cacheValid = isCacheValid(url);
+        // let cachedData = getCachedData(sendObj.action);
+        // const cacheValid = isCacheValid(sendObj.action);
       
-        if (!cachedData || !cacheValid) {
-          const response = await axios.post('http://localhost:5000/data', sendObj, {
+        // if (!cachedData || !cacheValid) {
+          const response = await axios.post('http://localhost:5000/home', sendObj, {
             headers: {
               'Content-Type': 'application/json'
             }
           });
-
+     
           const newData =response.data;
-          cachedData = newData;
-          setCachedData(url, newData);
-          setCacheExpiry(url);
-        }
-
-        if (isMounted) {
-          setData(cachedData);
+     
+          // cachedData = newData;
+          // setCachedData(sendObj.action, newData);
+          // setCacheExpiry(sendObj.action);
+          setData(newData);
           setLoading(false);
-        }
+        
       } catch (error) {
-        if (isMounted) {
           setError(error);
           setLoading(false);
-        }
       }
     };
 
     fetchData();
 
     return () => {
-      isMounted = false;
+      
     };
-  }, [url, sendObj]);
+  }, []);
 
   return { data, loading, error };
 }
@@ -53,21 +48,21 @@ function useCachedFetch(url, sendObj = {}, cacheTime = 300000) {
 // Object to store cached data and its expiry time
 const cache = {};
 
-function getCachedData(url) {
-  return cache[url] ? cache[url].data : null;
+function getCachedData(ind) {
+  return cache[ind] ? cache[ind].data : null;
 }
 
-function setCachedData(url, data) {
-  cache[url] = { data };
+function setCachedData(ind, data) {
+  cache[ind] = { data };
 }
 
-function isCacheValid(url) {
-  const cachedItem = cache[url];
+function isCacheValid(ind) {
+  const cachedItem = cache[ind];
   return cachedItem && Date.now() < cachedItem.expiresAt;
 }
 
-function setCacheExpiry(url, cacheTime = 300000) {
-  cache[url].expiresAt = Date.now() + cacheTime;
+function setCacheExpiry(ind, cacheTime = 300000) {
+  cache[ind].expiresAt = Date.now() + cacheTime;
 }
 
 export default useCachedFetch;

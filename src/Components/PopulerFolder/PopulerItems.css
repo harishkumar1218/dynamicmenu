@@ -7,7 +7,6 @@
     height: 300px;
     width: 370px; 
     box-shadow: 0 2px 2px rgb(208, 208, 208);
-    border-radius:25px;
 }
 
 .Populer-scroll-container {
@@ -71,4 +70,5 @@
     background: linear-gradient(to top, #01010147, #2e2e2e00);
     border-radius: 0px 0px 20px 20px;
     padding: 0%;
+    border-radius: 20px;
   }

@@ -1,44 +1,119 @@
-import React, { createRef } from "react";
+import React, { createRef, useLayoutEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaSearchengin } from "react-icons/fa6";
+import { FaL, FaSearchengin } from "react-icons/fa6";
 import { useRef, useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import { CNavbar, CContainer, CNavbarBrand, CCard, CCardImage, CNavLink, CButton, CCardImageOverlay, CCardTitle, CCardText, CNav, CNavItem } from '@coreui/react'
 import "./menu.css";
 import "../CategoryFolder/Category.css";
+import useCachedFetch from "../../customhooksFolder/useFetch";
+import axios from "axios";
 
-const catogorys = {
-    0: { id: 0, name: "Veg Pizza" },
-    1: { id: 1, name: "Non-Veg Pizza" },
-    2: { id: 2, name: "Recommendation" },
-    3: { id: 3, name: "Biryani" }
-}
-const items = {
-    0: { catogory_id: 0, item_id: 12, name: "xyz", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99 },
-    1: { catogory_id: 1, item_id: 15, name: "abc", imgUrl: "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", price: 99 }
-};
 
-const FMenuNav = () => {
-
-    let sectionRefs = [useRef(null),useRef(null),useRef(null),useRef(null)]
-    const [activeTab, setActiveTab] = useState(0);
+const FMenuNav = ({ name = 'Default Name'}) => {
+    const location = useLocation();
+    const { initActiveTab = 0 } = location.state || {};
+    const sectionRefs = useRef([]);
+    const [activeTab, setActiveTab] = useState(initActiveTab | 0);
+    const [activeButton, setActiveButton] = useState("all");
     const navigationRef = useRef(null);
-    const navigate = useNavigate();
-    const MenuNavHeight = document.querySelector(".Menu-nev")?.getBoundingClientRect().height;
     const navigationBar = navigationRef?.current;
-    const navItem = navigationBar?.children[activeTab];
+    const navItem = navigationBar?.children[initActiveTab | 0];
+    const navigate = useNavigate();
+    const MenuNavHeight = document.querySelector(".MenuNev")?.getBoundingClientRect().height;
+    const [populerList, setPopulerList] = useState([]);
+    const [catogory, setCatogory] = useState([]);
+    const [cartItems, setcartItems] = useState({});
+    const [, setState] = useState();
+    const forceUpdate = () => setState({});
+    const cardCountRefs = useRef({});
 
-
-    if (navItem) {
-        navigationBar.scrollTo({
-            left: navItem.offsetLeft - navigationBar.clientWidth / 2 + navItem.clientWidth / 2,
-            behavior: 'smooth'
-        });
+    const populerRequest = {
+        inputs:
+        {
+            restaurant_id: "66378cd6bed0587fd82cabb3",
+            user: "hari"
+        },
+        action: "populer"
     }
+    const catogoryRequest = {
+        inputs:
+        {
+            restaurant_id: "66378cd6bed0587fd82cabb3",
+            user: "hari"
+        },
+        action: "catogorys"
+
+    }
+    const { data: populerData, loading: populerLoading, error: populerError } = useCachedFetch("home", populerRequest);
+    useEffect(() => {
+        if (populerData) setPopulerList(populerData);
+    }, [populerData]);
+
+    const { data: catogoryData, loading: catogoryLoading, error: catogoryError } = useCachedFetch("home", catogoryRequest);
+    useEffect(() => {
+        if (catogoryData) setCatogory(catogoryData);
+    }, [catogoryData]);
+    
+
+    useEffect(() => {
+        if (catogory.length > 0) {   
+            sectionRefs.current = catogory.map((_, index) => sectionRefs.current[index] || createRef());
+        }
+    }, [catogory]);
+
+    useEffect(() => {
+        if (populerList.length > 0) {
+            cardCountRefs.current = populerList.map((_, index) => cardCountRefs.current[index] || { count: 0 });
+            
+        }
+    }, [populerList]);
+
+
+    const handleIncrement = (index) => {
+        cardCountRefs.current[index].count += 1;
+        if (cartItems.hasOwnProperty(index)) {
+            cartItems[index].count++;
+            setcartItems(cartItems);
+        } else {
+            cartItems[index] = { ...populerList[index], count: 1 };
+        }
+        forceUpdate();
+    };
+
+
+    const handleDecrement = (index) => {
+        if (cardCountRefs.current[index].count > 0) {
+            cardCountRefs.current[index].count -= 1;
+            if (index in cartItems) {
+                cartItems[index].count--;
+                if (cartItems[index].count <= 0) {
+                    delete cartItems[index];
+                }
+                setcartItems(cartItems);
+            }
+            forceUpdate();
+        }
+    };
+
+
+
+    useEffect(()=>{
+        if (navItem) {
+            navigationBar.scrollTo({
+                left: navItem.offsetLeft - navigationBar.clientWidth / 2 + navItem.clientWidth / 2,
+                behavior: 'smooth'
+            });
+        }
+    },[navItem])
+
 
     const scrollHandler = (sectionIndex) => {
-        console.log(sectionIndex);
-        const section = sectionRefs[sectionIndex].current;
+      
+        const section = sectionRefs.current[sectionIndex].current;
+        console.log(navItem);
         if (section) {
+            console.log(section);
             const scrollPosition = section.offsetTop - MenuNavHeight;
             window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
             setActiveTab(sectionIndex);
@@ -47,11 +122,60 @@ const FMenuNav = () => {
     }
 
 
+    const initialMount = useRef(true);
+
+    useEffect(() => {
+     if(initialMount.current){
+        if(catogory.length > 0 && sectionRefs.current.length > 0 && sectionRefs.current[initActiveTab].current){
+            initialMount.current=false;
+            scrollHandler(parseInt(initActiveTab));            
+        }
+    }
+      
+    }, [catogory,initialMount,sectionRefs]);
+
+    
+
+      
+    const handleButtonClick = (button) => {
+        setActiveButton(activeButton === button ? null : button);
+    };
+
+
+
+    const handleSortClick = async() => {
+
+        const sortRequest = {
+            input: {
+                FoodType: activeButton,
+            },
+            action: "sort"
+        };
+        try {
+            const response = await axios.post("http://localhost:5000/home", sortRequest, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const newData = response.data;
+            if (newData) setPopulerList(newData);
+            console.log("sort");
+          } catch (error) {
+           console.log(error);
+          }
+          forceUpdate();
+        
+
+    };
+
+
+
+
     useEffect(() => {
         const options = {
             root: null,
-            rootMargin: '0px',
-            threshold: 1,
+            rootMargin: '-50% 0px -50% 0px',
+            threshold: 0,
         };
 
         const callback = (entries) => {
@@ -63,7 +187,9 @@ const FMenuNav = () => {
         };
 
         const observer = new IntersectionObserver(callback, options);
-        sectionRefs.map((ref, index) => {
+
+        sectionRefs.current.forEach((ref, index) => {
+
             if (ref.current) {
                 observer.observe(ref.current);
             }
@@ -72,12 +198,14 @@ const FMenuNav = () => {
         return () => {
             observer.disconnect();
         };
-    }, []);
+    }, [sectionRefs.current]);
 
 
     return (
         <div className="Menu" style={{ paddingBottom: 60 }}>
-            <div className="Menu-nev" style={{ zIndex: 1, boxShadow: '0px -3px 6px rgba(0, 0, 0, 0.5)' }}>
+
+            <div className="MenuNev" style={{ zIndex: 1, boxShadow: '0px -3px 6px rgba(0, 0, 0, 0.5)' }}>
+
                 <CNavbar className="bg-body-tertiary">
                     <CContainer fluid>
                         <CNavbarBrand href="#">Hotel Orion</CNavbarBrand>
@@ -88,176 +216,113 @@ const FMenuNav = () => {
                 </CNavbar>
 
                 <div className="scroll-container bg-body-tertiary" style={{ padding: "5px", backgroundColor: "white" }}>
-                    <CButton color="light" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Veg</CButton>
-                    <CButton color="danger" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Non Veg</CButton>
-                    <CButton color="light" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Sort</CButton>
+                    <CButton
+                        onClick={() => handleButtonClick('all')}
+                        color={activeButton === 'all' ? "danger" : "light"}
+                        style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}
+                    >
+                        All
+                    </CButton>
+                    <CButton
+                        onClick={() => handleButtonClick('veg')}
+                        color={activeButton === 'veg' ? "danger" : "light"}
+                        style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}
+                    >
+                        Veg
+                    </CButton>
+                    <CButton
+                        onClick={() => handleButtonClick('nonveg')}
+                        color={activeButton === 'nonveg' ? "danger" : "light"}
+                        style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}
+                    >
+                        Non Veg
+                    </CButton>
+
+                    <CButton variant="outline" onClick={() =>handleSortClick()} color="danger" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Sort</CButton>
                 </div>
+
                 <div>
                     <CNav variant="underline-border" style={{ backgroundColor: "white", color: "black", cursor: "pointer" }}>
                         <CNavItem className="MenuScrollContainer" ref={navigationRef}>
-                            {Object.keys(catogorys).map((key) => {
-                                const category = catogorys[key];
+
+                            {catogory.map((catogoryValue, catogoryIndex) => {
                                 return (
                                     <CNavLink
-                                        key={category.id}
+                                        key={catogoryIndex}
                                         onClick={() => {
-                                            setActiveTab(category.id);
-                                            scrollHandler(category.id);
+                                            setActiveTab(catogoryIndex);
+                                            scrollHandler(catogoryIndex);
                                         }}
-                                        style={{ color: activeTab === category.id ? 'red' : 'black' }}
-                                        active={activeTab === category.id}
+                                        style={{ color: activeTab === catogoryIndex ? 'red' : 'black' }}
+                                        active={activeTab === catogoryIndex }
                                     >
-                                        {category.name}
+                                        {catogoryValue}
                                     </CNavLink>
                                 );
+
                             })}
+
+
                         </CNavItem>
                     </CNav>
                 </div>
+
             </div>
 
             <div className="menuContent" >
-                {/* {Object.keys(catogorys).map((key, index) => {
-                    const category = catogorys[key];
+
+                {catogory.map((catogoryValue, catogoryIndex) => {
+            
                     return (
-                        <div key={category.id} ref={sectionRefs.current[index]} data-index={index}>
-                            <div style={{ textAlign: 'center' }}>
-                                ------------{category.name}------------
-                            </div>
-                            <div>
+                        <div key={catogoryIndex} ref={sectionRefs.current[catogoryIndex]} data-index={catogoryIndex}>
 
-                            </div>
+                            <div style={{ textAlign: 'center' }}>------------{catogoryValue}------------</div>
+                            {
+                                populerList.map((value, index) => {
+                                    const item = value;
+
+                                    if (!cardCountRefs.current[index]) {
+                                        cardCountRefs.current[index] = { ref: null, count: 0 };
+                                    }
+                                    const count = cardCountRefs.current[index].count;
+                                    return (
+                                        <div key={index} ref={(el) => (cardCountRefs.current[index].ref = el)} style={{ borderRadius: "20px" }}>
+                                            <CCard className="PopulerCard" style={{ borderRadius: "20px", display: "inline-block", color: 'white' }}>
+                                                <CCardImage style={{ borderRadius: "20px" }} className="PopulerCard" src={item.img_url} />
+                                                <CCardImageOverlay style={{ borderRadius: "20px", padding: "3px" }} className='CardOverlay'>
+                                                    <div className="PopulerCardContent" >
+                                                        <div className='cardName'>
+                                                            <CCardTitle>{item?.name}</CCardTitle>
+                                                        </div>
+                                                        <div className="cardFooter">
+                                                            <CCardText className="leftContent" style={{ display: 'inline-block', verticalAlign: 'middle' }}>${item?.price}</CCardText>
+                                                            {
+                                                                (count === 0) ? (
+                                                                    <CButton className='button-container' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(index)}>Add +</CButton>
+                                                                ) : (
+                                                                    <div className="button-container">
+                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleDecrement(index) }}>-</button>
+                                                                        <span>{count}</span>
+                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleIncrement(index) }}>+</button>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </CCardImageOverlay>
+                                            </CCard>
+                                        </div>
+                                    );
+                                })
+                            }
                         </div>
-                    );
-                })} */}
-                <div ref={sectionRefs[0]} data-index={0}>
 
-                    <div style={{ textAlign: 'center' }}>------------Veg Pizza------------</div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                    
-                </div>
-                <div ref={sectionRefs[1]} data-index={1}>
-                    <div style={{ textAlign: 'center' }}>------------Non-Veg Pizza------------</div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
+                    )
+                })}
 
-                </div>
-                <div ref={sectionRefs[2]} data-index={2}>
-                    <div style={{ textAlign: 'center' }}>------------Recommendation------------</div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                </div>
-                <div ref={sectionRefs[3]} data-index={3}>
-                    <div style={{ textAlign: 'center' }}>------------Biryani------------</div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                    <div>
-                        <CCard className="bg-dark text-white PopulerCard" style={{ display: 'inline-block' }}>
-                            <CCardImage className="PopulerCard" src={"https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg"} />
-                            <CCardImageOverlay className="CardOverlay" style={{ padding: "0%" }}>
-                                <div className="PopulerCardContent">
-                                    <div className='card-name'><CCardTitle >xyz</CCardTitle></div>
-                                    <div className="cardFooter">
-                                        <CCardText className="leftContent" style={{ color: 'white', display: 'inline-block', verticalAlign: 'middle' }}>$99</CCardText>
-                                        <CButton color="danger" href="#" className="right-content">Add +</CButton>
-                                    </div>
-                                </div>
-                            </CCardImageOverlay>
-                        </CCard>
-                    </div>
-                </div>
             </div>
+
+
         </div>
     );
 };

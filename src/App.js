@@ -6,11 +6,11 @@ import { GoogleLogin } from "@react-oauth/google";
 
 import "@coreui/coreui/dist/css/coreui.min.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserRouter } from "react-router-dom";
 
 
 const App = () => {
   const [isLoggedIn,setIsLoggedIn]=useState(localStorage.getItem("isLoggedIn"));
-  
   const handleLoginSuccess = (credentialResponse) => {
     const decode = jwtDecode(credentialResponse?.credential);
     localStorage.setItem("isLoggedIn", "true");
@@ -25,12 +25,12 @@ const App = () => {
 
 
   useEffect(()=>{
-    //rerendering if isLoggedin changed
   },[isLoggedIn])
   return (
 
-  
+    <BrowserRouter>
         <LayoutPage />
+      </BrowserRouter>
        
    
   );

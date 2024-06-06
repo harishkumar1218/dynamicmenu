@@ -4,6 +4,7 @@
     justify-content: center;
     align-items: center; 
     padding-bottom: 70px;
+    width: 100%;
 }
 .menuContent{
     display: flex;
@@ -12,7 +13,7 @@
     padding-left: 5%;
 }
 
-.Menu-nev{
+.MenuNev{
     position: sticky;
     top: 0;
     left: 0;

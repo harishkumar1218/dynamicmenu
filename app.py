@@ -11,17 +11,47 @@ CORS(app)
 def home():
     return "Hello, this is the response from your Flask app!"
 
-@app.route('/data', methods=['POST'])
+@app.route('/auth', methods=['POST'])
+def handle_data2():
+
+    return "Success"
+
+@app.route('/home', methods=['POST'])
 def handle_data():
     data = request.json
-    populer={
-    "0": { "catogory_id": 0, "item_id": 12, "name": "xyz", "imgUrl": "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", "price": 99, "discriptcs": "chisee and spisy"},
-    "1": { "catogory_id": 1, "item_id": 15, "name": "abc", "imgUrl": "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", "price": 99, "discriptcs": "chisee and spisy"},
-    "2": { "catogory_id": 7, "item_id": 17, "name": "rth", "imgUrl": "https://b.zmtcdn.com/data/pictures/chains/3/18819953/35e32dbde0a32fbf185b222612bf46fe_featured_v2.jpg", "price": 99, "discriptcs": "chisee and spisy"}
-  }
+    poplist=[{'item_id': 14, 'name': 'Pilau Rice', 'price': 2.95, 'popularity': 1.0, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Pilau-Rice'},{'item_id': 10, 'name': 'Plain Naan', 'price': 2.6, 'popularity': 0.79, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Naan'},{'item_id': 5, 'name': 'Plain Papadum', 'price': 0.8, 'popularity': 0.76, 'category': 'Others', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Papadum'}]
+    poplist2=[{'item_id': 23, 'name': 'Pilau Rice', 'price': 2.95, 'popularity': 1.0, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Pilau-Rice'},{'item_id': 89, 'name': 'Plain Naan', 'price': 2.6, 'popularity': 0.79, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Naan'},{'item_id': 82, 'name': 'Plain Papadum', 'price': 0.8, 'popularity': 0.76, 'category': 'Others', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Papadum'}]
     
+    catogorys=["Starter","Mains","Others"]
+    bill={
+        "total":55,
+        "GST":-2,
+        "discount":2
+    }
+    user={
+        "name":"hari",
+        "phone":684845646,
+        "email":"harish@gmail.com"
+    }
+    auth={
+        "verifyed":True
+    }
+    if data and  data["action"]=="catogorys":
+        return jsonify(catogorys)
     
-    return jsonify(populer)
+    if data and data["action"]=="bill":
+        return jsonify(bill)
+    if data and data["action"]=="sort":
+        return jsonify(poplist[:2])
+    if  data and data["action"]=="cart_recommend":
+        return jsonify(poplist2)
+    
+    if data and data["action"]=="auth_signup":
+        return jsonify(user)
+    if data and data["action"]=="auth_login":
+        return jsonify(auth)
+
+    return jsonify(poplist)
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)

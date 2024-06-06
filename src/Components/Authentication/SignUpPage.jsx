@@ -1,12 +1,35 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import './Authantication.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate} from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa6';
+import useCachedFetch from '../../customhooksFolder/useFetch';
+import axios from 'axios';
 
 
 function SignUpPage() {
 
-    const nav = useNavigate()
+    const navigator = useNavigate()
+    const [populerList, setPopulerList] = useState([]);
+
+    const signupRequest = {
+        inputs:
+        {
+            restaurant_id: "66378cd6bed0587fd82cabb3",
+            user: "hari"
+        },
+        action: "auth_signup"
+    }
+      
+    
+    const { data: populerData, loading: populerLoading, error: populerError } = useCachedFetch("home", signupRequest);
+    useLayoutEffect(() => {
+        if (populerData) setPopulerList(populerData);
+    }, [populerData]);
+
+    // if(populerData){
+    //     navigator("/home");
+    // }
+
     const [formData, setFormData] = useState({
         name: '',
         phoneNumber: ''
@@ -21,47 +44,49 @@ function SignUpPage() {
         console.log(formData);
         try {
 
-            const response = await fetch('http://localhost:5000/api/auth/register', {
-                method: 'POST',
+            const response =  await axios.post('http://localhost:5000/auth', formData, {
                 headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              console.log(response);
 
-            if (response.ok) {
+            if (response.status==200) {
                 console.log('User registered successfully');
-
+                localStorage.setItem("isLoggedIn", "true");
+                navigator("/home")
             } else {
                 const errorData = await response.json();
                 console.error('Registration failed:', errorData);
-                nav.push("/home")
-
+               
+                // Handle registration error
             }
         } catch (error) {
             console.error('Error:', error);
-
+            // Handle error
         }
     };
-    return (
 
-        <div className="container-fluid">
+    return (
+        <div className='authBody'>
+        <div className="containerAuthFluid">
 
             <div className="row d-flex justify-content-center align-items-center h-100">
                 <div className="col-12">
 
                     <div style={{borderRadius:"25px"}}  className="card bg-dark text-white my-5 mx-auto custom-card">
-                        <div className="card-body p-5 d-flex flex-column align-items-center mx-auto w-100">
+                        <div className="cardAuthBody p-5 d-flex flex-column align-items-center mx-auto w-100">
 
-                            <h2 className="fw-bold mb-2 text-uppercase">Register</h2>
+                            <h2 className="fwAuthBold mb-2 text-uppercase">Register</h2>
                             <p className="text-white-50 mb-2">Please enter your Details!</p>
 
-                            <div className="form-container">
-                                <div className="form-group">
+                            <div className="formAuthContainer">
+                                <div className="formAuthGroup">
                                     <label htmlFor="firstName">Name</label>
                                     <input onChange={handleChange} className="form-control" name="name" type="text" />
                                 </div>
-                                <div className="form-group">
+                                <div className="formAuthGroup">
                                     <label htmlFor="phoneNumber">Phone Number</label>
                                     <input onChange={handleChange} className="form-control" name="phoneNumber" type="text" />
                                 </div>
@@ -86,6 +111,7 @@ function SignUpPage() {
 
                 </div>
             </div>
+        </div>
         </div>
     );
 }
