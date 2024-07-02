@@ -10,79 +10,89 @@ import useCachedFetch from "../../customhooksFolder/useFetch";
 import axios from "axios";
 
 
-const FMenuNav = ({ name = 'Default Name'}) => {
+const FMenuNav = ({ name = 'Default Name' }) => {
+
     const location = useLocation();
     const { initActiveTab = 0 } = location.state || {};
-    const sectionRefs = useRef([]);
+
     const [activeTab, setActiveTab] = useState(initActiveTab | 0);
     const [activeButton, setActiveButton] = useState("all");
+
+    const [menu, setMenu] = useState({});
+    const [originalMenu, setOriginalMenu] = useState({});
+    const [catogory, setCatogory] = useState([]);
+
+    const [cartItems, setCartItems] = useState({});
+    useEffect(() => (setCartItems(localStorage.getItem('cart') != null ? JSON.parse(localStorage.getItem('cart')) : {})), [localStorage.getItem('cart')])
+
+    const sectionRefs = useRef([]);
+    const cardCountRefs = useRef({});
+
+
+    const [, setState] = useState();
+    const forceUpdate = () => setState({});
+
+
     const navigationRef = useRef(null);
     const navigationBar = navigationRef?.current;
     const navItem = navigationBar?.children[initActiveTab | 0];
+
+
     const navigate = useNavigate();
     const MenuNavHeight = document.querySelector(".MenuNev")?.getBoundingClientRect().height;
-    const [populerList, setPopulerList] = useState([]);
-    const [catogory, setCatogory] = useState([]);
-    const [cartItems, setcartItems] = useState({});
-    const [, setState] = useState();
-    const forceUpdate = () => setState({});
-    const cardCountRefs = useRef({});
 
-    const populerRequest = {
+    const menuRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
-            user: "hari"
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
+            user: "hari",
+            sort_by: "",
+            sequence: "low-high",
+            filter_by: "veg"
         },
-        action: "populer"
+        action: "menu"
     }
-    const catogoryRequest = {
-        inputs:
-        {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
-            user: "hari"
-        },
-        action: "catogorys"
 
-    }
-    const { data: populerData, loading: populerLoading, error: populerError } = useCachedFetch("home", populerRequest);
-    useEffect(() => {
-        if (populerData) setPopulerList(populerData);
-    }, [populerData]);
 
-    const { data: catogoryData, loading: catogoryLoading, error: catogoryError } = useCachedFetch("home", catogoryRequest);
-    useEffect(() => {
-        if (catogoryData) setCatogory(catogoryData);
-    }, [catogoryData]);
-    
+
+    const { data: menuData, loading: menuLoading, error: menuError } = useCachedFetch("home", menuRequest);
 
     useEffect(() => {
-        if (catogory.length > 0) {   
+        if (menuData) {
+            setMenu(menuData);
+            setOriginalMenu(JSON.parse(JSON.stringify(menuData))); //deep copying to original menu
+        }
+    }, [menuData]);
+
+    useEffect(() => {
+
+        const array = []
+        if (menuData) Object.keys(menuData).map((key) => (array.push(key.toString())));
+        setCatogory(array);
+    }, [menuData]);
+
+
+    useEffect(() => {
+        if (catogory.length > 0) {
             sectionRefs.current = catogory.map((_, index) => sectionRefs.current[index] || createRef());
         }
     }, [catogory]);
 
-    useEffect(() => {
-        if (populerList.length > 0) {
-            cardCountRefs.current = populerList.map((_, index) => cardCountRefs.current[index] || { count: 0 });
-            
-        }
-    }, [populerList]);
-
-
-    const handleIncrement = (index) => {
+    const handleIncrement = (catogoryName, itemIndex, index) => {
         cardCountRefs.current[index].count += 1;
         if (cartItems.hasOwnProperty(index)) {
             cartItems[index].count++;
-            setcartItems(cartItems);
+            setCartItems(cartItems);
+            localStorage.setItem("cart", JSON.stringify(cartItems));
         } else {
-            cartItems[index] = { ...populerList[index], count: 1 };
+            cartItems[index] = { ...menu[catogoryName][itemIndex], count: 1 };
+            localStorage.setItem("cart", JSON.stringify(cartItems));
         }
         forceUpdate();
     };
 
 
-    const handleDecrement = (index) => {
+    const handleDecrement = (catogoryName, itemIndex, index) => {
         if (cardCountRefs.current[index].count > 0) {
             cardCountRefs.current[index].count -= 1;
             if (index in cartItems) {
@@ -90,7 +100,8 @@ const FMenuNav = ({ name = 'Default Name'}) => {
                 if (cartItems[index].count <= 0) {
                     delete cartItems[index];
                 }
-                setcartItems(cartItems);
+                setCartItems(cartItems);
+                localStorage.setItem("cart", JSON.stringify(cartItems));
             }
             forceUpdate();
         }
@@ -98,22 +109,22 @@ const FMenuNav = ({ name = 'Default Name'}) => {
 
 
 
-    useEffect(()=>{
+    useEffect(() => {
         if (navItem) {
             navigationBar.scrollTo({
                 left: navItem.offsetLeft - navigationBar.clientWidth / 2 + navItem.clientWidth / 2,
                 behavior: 'smooth'
             });
         }
-    },[navItem])
+    }, [navItem])
 
 
     const scrollHandler = (sectionIndex) => {
-      
+
         const section = sectionRefs.current[sectionIndex].current;
-        console.log(navItem);
+
         if (section) {
-            console.log(section);
+
             const scrollPosition = section.offsetTop - MenuNavHeight;
             window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
             setActiveTab(sectionIndex);
@@ -122,28 +133,45 @@ const FMenuNav = ({ name = 'Default Name'}) => {
     }
 
 
+
     const initialMount = useRef(true);
 
     useEffect(() => {
-     if(initialMount.current){
-        if(catogory.length > 0 && sectionRefs.current.length > 0 && sectionRefs.current[initActiveTab].current){
-            initialMount.current=false;
-            scrollHandler(parseInt(initActiveTab));            
+        if (initialMount.current) {
+            if (catogory.length > 0 && sectionRefs.current.length > 0 && sectionRefs.current[initActiveTab].current) {
+                initialMount.current = false;
+                scrollHandler(parseInt(initActiveTab));
+            }
         }
-    }
-      
-    }, [catogory,initialMount,sectionRefs]);
 
-    
+    }, [catogory, initialMount, sectionRefs]);
 
-      
-    const handleButtonClick = (button) => {
-        setActiveButton(activeButton === button ? null : button);
+
+
+    const handleButtonClick = (type) => {
+        setActiveButton(activeButton === type ? null : type);
+
+        if (type == "veg" || type == "non-veg") {
+
+            for (let category in originalMenu) {
+                if (originalMenu.hasOwnProperty(category) && Array.isArray(originalMenu[category])) {
+                    menu[category] = originalMenu[category].filter(item => item.type === type);
+                }
+            }
+        }
+        if (type == "all") {
+            for (let category in menu) {
+                if (menu.hasOwnProperty(category) && Array.isArray(menu[category])) {
+                    menu[category] = [...originalMenu[category]];
+                }
+            }
+        }
+
     };
 
 
 
-    const handleSortClick = async() => {
+    const handleSortClick = async () => {
 
         const sortRequest = {
             input: {
@@ -153,18 +181,18 @@ const FMenuNav = ({ name = 'Default Name'}) => {
         };
         try {
             const response = await axios.post("http://localhost:5000/home", sortRequest, {
-              headers: {
-                'Content-Type': 'application/json'
-              }
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
             const newData = response.data;
-            if (newData) setPopulerList(newData);
-            console.log("sort");
-          } catch (error) {
-           console.log(error);
-          }
-          forceUpdate();
-        
+            if (newData) setMenu(newData);
+
+        } catch (error) {
+            console.log(error);
+        }
+        forceUpdate();
+
 
     };
 
@@ -231,14 +259,14 @@ const FMenuNav = ({ name = 'Default Name'}) => {
                         Veg
                     </CButton>
                     <CButton
-                        onClick={() => handleButtonClick('nonveg')}
-                        color={activeButton === 'nonveg' ? "danger" : "light"}
+                        onClick={() => handleButtonClick('non-veg')}
+                        color={activeButton === 'non-veg' ? "danger" : "light"}
                         style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}
                     >
                         Non Veg
                     </CButton>
 
-                    <CButton variant="outline" onClick={() =>handleSortClick()} color="danger" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Sort</CButton>
+                    <CButton variant="outline" onClick={() => handleSortClick()} color="danger" style={{ boxShadow: "0 0 10px rgb(200, 200, 200)", marginRight: "10px" }}>Sort</CButton>
                 </div>
 
                 <div>
@@ -254,9 +282,9 @@ const FMenuNav = ({ name = 'Default Name'}) => {
                                             scrollHandler(catogoryIndex);
                                         }}
                                         style={{ color: activeTab === catogoryIndex ? 'red' : 'black' }}
-                                        active={activeTab === catogoryIndex }
+                                        active={activeTab === catogoryIndex}
                                     >
-                                        {catogoryValue}
+                                        {catogoryValue != "Others" ? catogoryValue : "Side Dish"}
                                     </CNavLink>
                                 );
 
@@ -271,39 +299,40 @@ const FMenuNav = ({ name = 'Default Name'}) => {
 
             <div className="menuContent" >
 
-                {catogory.map((catogoryValue, catogoryIndex) => {
-            
+                {Object.keys(menu).map((catogoryValue, catogoryIndex) => {
+
                     return (
                         <div key={catogoryIndex} ref={sectionRefs.current[catogoryIndex]} data-index={catogoryIndex}>
 
-                            <div style={{ textAlign: 'center' }}>------------{catogoryValue}------------</div>
+                            <div style={{ textAlign: 'center' }}>-------------{catogoryValue != "Others" ? catogoryValue : "Side Dish"}-------------</div>
                             {
-                                populerList.map((value, index) => {
+                                menu[catogoryValue].map((value, index) => {
                                     const item = value;
 
-                                    if (!cardCountRefs.current[index]) {
-                                        cardCountRefs.current[index] = { ref: null, count: 0 };
+                                    if (!cardCountRefs.current[item.item_id]) {
+                                        cardCountRefs.current[item.item_id] = { ref: null, count: cartItems[item.item_id] != null ? cartItems[item.item_id].count : 0 };
                                     }
-                                    const count = cardCountRefs.current[index].count;
+                                    const count = cardCountRefs.current[item.item_id].count;
+
                                     return (
-                                        <div key={index} ref={(el) => (cardCountRefs.current[index].ref = el)} style={{ borderRadius: "20px" }}>
+                                        <div key={index} ref={(el) => (cardCountRefs.current[item.item_id].ref = el)} style={{ borderRadius: "20px" }}>
                                             <CCard className="PopulerCard" style={{ borderRadius: "20px", display: "inline-block", color: 'white' }}>
                                                 <CCardImage style={{ borderRadius: "20px" }} className="PopulerCard" src={item.img_url} />
                                                 <CCardImageOverlay style={{ borderRadius: "20px", padding: "3px" }} className='CardOverlay'>
-                                                    <div className="PopulerCardContent" >
+                                                    <div className="PopulerCardContent">
                                                         <div className='cardName'>
-                                                            <CCardTitle>{item?.name}</CCardTitle>
+                                                            <CCardTitle><h5>{item?.name}</h5></CCardTitle>
                                                         </div>
                                                         <div className="cardFooter">
-                                                            <CCardText className="leftContent" style={{ display: 'inline-block', verticalAlign: 'middle' }}>${item?.price}</CCardText>
+                                                            <CCardText className="leftContent" style={{ display: 'inline-block', verticalAlign: 'middle' }}><h5>{item.type == "non-veg" ? <img width="35" height="35" src="https://img.icons8.com/color/48/non-vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol" /> : <img width="35" height="35" src="https://img.icons8.com/color/48/vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol" />} ${item?.price}</h5></CCardText>
                                                             {
                                                                 (count === 0) ? (
-                                                                    <CButton className='button-container' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(index)}>Add +</CButton>
+                                                                    <CButton className='button-container' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(catogoryValue, index, item.item_id)}>Add +</CButton>
                                                                 ) : (
                                                                     <div className="button-container">
-                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleDecrement(index) }}>-</button>
+                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleDecrement(catogoryValue, index, item.item_id) }}>-</button>
                                                                         <span>{count}</span>
-                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleIncrement(index) }}>+</button>
+                                                                        <button style={{ backgroundColor: "transparent" }} onClick={() => { handleIncrement(catogoryValue, index, item.item_id) }}>+</button>
                                                                     </div>
                                                                 )
                                                             }

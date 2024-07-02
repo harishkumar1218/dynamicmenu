@@ -13,8 +13,12 @@
   .searchImage {
     width: 70px;
     height: 70px;
+    display: flex;
+    justify-self: center;
+    align-self: center;
     border-radius: 15px;
     margin-right: 16px;
+    margin-left: 3px;
   }
   
   .searchCardDetails {

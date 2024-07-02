@@ -13,7 +13,7 @@ function LoginPage() {
     const populerRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
             user: "hari"
         },
         action: "auth_login"
@@ -29,7 +29,8 @@ function LoginPage() {
     if(Object.keys(populerList).length>0 && !populerList.verifyed){
         nav("/home");
     }
-    console.log(populerList);
+
+    
 
     const [formData, setFormData] = useState({
         name: '',
@@ -42,16 +43,19 @@ function LoginPage() {
 
     const handleSubmit = async (e) => {
         e?.preventDefault();
-        console.log(formData);
+        const formRequest={
+            inputs:formData,
+            action:"auth_login"
+        }
         try {
 
-            const response =  await axios.post('http://localhost:5000/auth', formData, {
+            const response =  await axios.post('http://localhost:5000/home', formRequest, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
               });
               
-              console.log(response);
+             
 
             if (response.status==200) {
                 console.log('User registered successfully');
@@ -79,7 +83,7 @@ function LoginPage() {
       
               const userProfile = userInfoResponse.data;
 
-              const response =  await axios.post('http://localhost:5000/auth', userProfile, {
+              const response =  await axios.post('http://localhost:5000/home', userProfile, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
@@ -111,11 +115,11 @@ function LoginPage() {
             <div  className="row d-flex justify-content-center align-items-center h-100">
                 <div  className="col-12">
 
-                    <div style={{borderRadius:"25px"}} className="card bg-dark text-white my-5 mx-auto customAuthCard">
+                    <div style={{borderRadius:"25px"}} className="card bg-dark text-white my-5 mx-auto custom-card">
                         <div className="cardAuthBody p-5 d-flex flex-column align-items-center mx-auto w-100">
 
                             <h2 className="fwAuthBold mb-2 text-uppercase">Login</h2>
-                            <p className="text-white-50 mb-5">Please enter your Name and Number!</p>
+                            <p className="text-white-50 mb-2">Please enter your Details!</p>
 
                             <div className="formAuthContainer">
                                 <div className="formAuthGroup">
@@ -134,7 +138,6 @@ function LoginPage() {
 
                             <div className="d-flex flex-row mt-3 mb-5">
                                 <a href="#!" className="btn btn-link m-3" style={{ color: 'white' }}>
-
                                     <FaGoogle onClick={()=>login()} />
                                 </a>
                             </div>

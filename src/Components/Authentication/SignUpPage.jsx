@@ -4,6 +4,7 @@ import { Link, useNavigate} from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa6';
 import useCachedFetch from '../../customhooksFolder/useFetch';
 import axios from 'axios';
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 function SignUpPage() {
@@ -26,9 +27,7 @@ function SignUpPage() {
         if (populerData) setPopulerList(populerData);
     }, [populerData]);
 
-    // if(populerData){
-    //     navigator("/home");
-    // }
+
 
     const [formData, setFormData] = useState({
         name: '',
@@ -41,16 +40,14 @@ function SignUpPage() {
 
     const handleSubmit = async (e) => {
         e?.preventDefault();
-        console.log(formData);
         try {
 
-            const response =  await axios.post('http://localhost:5000/auth', formData, {
+            const response =  await axios.post('https://dynamicmenu.onrender.com/auth', formData, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
               });
               
-              console.log(response);
 
             if (response.status==200) {
                 console.log('User registered successfully');
@@ -67,6 +64,41 @@ function SignUpPage() {
             // Handle error
         }
     };
+
+    const login = useGoogleLogin({
+          onSuccess: async (tokenResponse) => {
+            try {
+              const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+                headers: {
+                  Authorization: `Bearer ${tokenResponse.access_token}`,
+                },
+              });
+      
+              const userProfile = userInfoResponse.data;
+
+              const response =  await axios.post('https://dynamicmenu.onrender.com/auth', userProfile, {
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              if (response.status==200) {
+                console.log('User registered successfully');
+                localStorage.setItem("isLoggedIn", "true");
+                navigator("/home")
+
+            } else {
+                const errorData = await response.json();
+                console.error('Registration failed:', errorData);
+            }
+            
+            } catch (error) {
+              console.error('Failed to fetch user profile', error);
+            }
+          },
+          scope: 'profile email',
+        });
+      
 
     return (
         <div className='authBody'>
@@ -93,13 +125,13 @@ function SignUpPage() {
                             </div>
 
 
-                            <button onClick={handleSubmit} style={{ marginTop: "10px", borderRadius: "7px", height: "30px", width: "80px", color: "black", backgroundColor: "white" }} >
+                            <button onClick={handleSubmit} style={{ marginTop: "20px", borderRadius: "7px", height: "30px", width: "80px", color: "black", backgroundColor: "white" }} >
                                 Sign Up
                             </button>
 
                             <div className="d-flex flex-row mt-3 mb-5">
                                 <a href="#!" className="btn btn-link m-3" style={{ color: 'white' }}>
-                                    <FaGoogle />
+                                     <FaGoogle onClick={()=>login()} />
                                 </a>
                             </div>
 
