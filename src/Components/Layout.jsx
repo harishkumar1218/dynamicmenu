@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FCart } from './Cart';
 import { HomePage } from "./Home";
 import { FMenuNav } from "./MenuFolder/Menu";
@@ -6,8 +6,7 @@ import { useState,createContext } from "react";
 import { FSearch } from './SearchFolder/searchbar';
 import { FFooter } from "./FooterFolder/FooterItems";
 import { ScrollToTopOnPageChange } from "./ScrollToTop";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import Dashboard from './Temp';
+import {  Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from './Authentication/LoginPage';
 import SignUpPage from './Authentication/SignUpPage';
 

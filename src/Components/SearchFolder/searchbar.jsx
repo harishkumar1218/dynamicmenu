@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from 'react';
-import { FaIndianRupeeSign, FaSearchengin } from "react-icons/fa6";
+import {  FaSearchengin } from "react-icons/fa6";
 import { CNavbar, CInputGroup, CSpinner, CFormInput, CButton } from '@coreui/react'
 
 import './Search.css';
@@ -105,7 +105,7 @@ const FSearch = () => {
       </div>
       <div >
       {
-        (searchQueue == "") ?
+        (searchQueue.length === 0) ?
           (
             <div>
               <div style={{ paddingLeft: "5px" }}>Popular Searches</div>
@@ -129,7 +129,7 @@ const FSearch = () => {
                 <img src={item.img_url} className="searchImage" alt="Card" />
                 <div className="searchCardDetails">
                 <h5>{item.name}</h5>
-                <p>{item.type=="non-veg"?<img width="35" height="35" src="https://img.icons8.com/color/48/non-vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>:<img width="35" height="35" src="https://img.icons8.com/color/48/vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>}{item.type}</p>
+                <p>{item.type==="non-veg"?<img width="35" height="35" src="https://img.icons8.com/color/48/non-vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>:<img width="35" height="35" src="https://img.icons8.com/color/48/vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>}{item.type}</p>
                                     
                 </div>
                 <div className="searchCardFooter">

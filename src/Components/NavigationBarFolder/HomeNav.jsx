@@ -86,7 +86,7 @@ const FNavbar = () => {
                 <CSidebarNav style={{ paddingLeft: "20px" }} >
                   <CNavTitle>Welcome TO Orian</CNavTitle>
                   <div onClick={() => console.log(555)} >Customer Care</div>
-                  {localStorage.getItem("isLoggedIn") == "true" ?
+                  {localStorage.getItem("isLoggedIn") === "true" ?
                     (<div style={{ cursor: "pointer" }} onClick={signOut}>Logout </div>) : (<div style={{ cursor: "pointer" }} >Sign In </div>)}
                 </CSidebarNav>
                 <CSidebarHeader className="border-top">
