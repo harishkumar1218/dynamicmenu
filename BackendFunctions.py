@@ -1,9 +1,6 @@
 import pymongo
 from bson.objectid import ObjectId
-import pandas
-import itertools
 from fuzzywuzzy import process
-import numpy
 from scipy.spatial import distance
 import collections
 from flask import Flask, request, jsonify
