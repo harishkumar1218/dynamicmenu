@@ -1,11 +1,27 @@
 
-#"start": "react-scripts start",
-#"concurrently \"npm run start-frontend\" \"python app.py\""
+# #"start": "react-scripts start",
+# #"concurrently \"npm run start-frontend\" \"python app.py\""
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from BackendFunctions import *
 
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
 CORS(app) 
+function_map = {
+    "popular": PopularItems,
+    "recommended": RecommendedItems,
+    "combo":Combo,
+    "search": SearchItems,
+    "catogorys":GetCategories,
+    "sort":SortFilterItems,
+    "cart_recommend":CartRecommend,
+    "menu":GetMenu,
+    "auth_signup":SetUser,
+    "auth_login":GetUser,
+    "bill":GetBill,
+    "addtocart":AddToCart
+}
 
 @app.route('/', methods=['GET'])
 def home():
@@ -13,45 +29,23 @@ def home():
 
 @app.route('/auth', methods=['POST'])
 def handle_data2():
-
     return "Success"
 
 @app.route('/home', methods=['POST'])
 def handle_data():
     data = request.json
     poplist=[{'item_id': 14, 'name': 'Pilau Rice', 'price': 2.95, 'popularity': 1.0, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Pilau-Rice'},{'item_id': 10, 'name': 'Plain Naan', 'price': 2.6, 'popularity': 0.79, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Naan'},{'item_id': 5, 'name': 'Plain Papadum', 'price': 0.8, 'popularity': 0.76, 'category': 'Others', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Papadum'}]
-    poplist2=[{'item_id': 23, 'name': 'Pilau Rice', 'price': 2.95, 'popularity': 1.0, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Pilau-Rice'},{'item_id': 89, 'name': 'Plain Naan', 'price': 2.6, 'popularity': 0.79, 'category': 'Starter', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Naan'},{'item_id': 82, 'name': 'Plain Papadum', 'price': 0.8, 'popularity': 0.76, 'category': 'Others', 'type': 'veg', 'img_url': 'https://source.unsplash.com/350x300/?Plain-Papadum'}]
+
+    if data['action'] in function_map:
+        return function_map[data['action']](data['inputs'])
     
-    catogorys=["Starter","Mains","Others"]
-    bill={
-        "total":55,
-        "GST":-2,
-        "discount":2
-    }
-    user={
-        "name":"hari",
-        "phone":684845646,
-        "email":"harish@gmail.com"
-    }
-    auth={
-        "verifyed":True
-    }
-    if data and  data["action"]=="catogorys":
-        return jsonify(catogorys)
-    
-    if data and data["action"]=="bill":
-        return jsonify(bill)
-    if data and data["action"]=="sort":
-        return jsonify(poplist[:2])
-    if  data and data["action"]=="cart_recommend":
-        return jsonify(poplist2)
-    
-    if data and data["action"]=="auth_signup":
-        return jsonify(user)
-    if data and data["action"]=="auth_login":
-        return jsonify(auth)
 
     return jsonify(poplist)
 
+
+
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)
+
+
+
