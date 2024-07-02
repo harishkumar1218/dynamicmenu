@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import './Category.css';
 import { CCard, CPlaceholder, CCardBody, CCardImage, CCardTitle, CCol } from '@coreui/react';
 import useCachedFetch from "../../customhooksFolder/useFetch";
@@ -7,23 +7,24 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 const CardComponent = ({ img, name, }) => {
   const navigate = useNavigate();
-  const loading=false;
+  const loading = false;
   const placeHoldersList = [];
   const [populerList, setPopulerList] = useState([]);
 
   const populerRequest = {
     inputs:
     {
-        restaurant_id: "66378cd6bed0587fd82cabb3",
-        user: "hari"
+      restaurant_id: "66378cd6bed0587fd82cabb3",
+      user: "hari"
     },
-    action: "populer"
-}
-  
+    action: "catogorys"
+  }
+
   const { data: populerData, loading: populerLoading, error: populerError } = useCachedFetch("home", populerRequest);
   useEffect(() => {
-      if (populerData) setPopulerList(populerData);
+    if (populerData) setPopulerList(populerData);
   }, [populerData]);
+
 
 
   const PlaceholderCard = () => (
@@ -40,8 +41,8 @@ const CardComponent = ({ img, name, }) => {
   for (let i = 0; i < 3; i++) {
     placeHoldersList.push(
       <CCol xs>
-        <PlaceholderCard/>
-        <PlaceholderCard/>
+        <PlaceholderCard />
+        <PlaceholderCard />
       </CCol>
     );
   }
@@ -55,31 +56,32 @@ const CardComponent = ({ img, name, }) => {
           }
         </div>
       ) : (
-     
+
         <div className="scroll-container" style={{ paddingTop: "10px" }}>
           {
-            populerList.map((value,index) => {
-              const item = value;
+            populerList.map((value, index) => {
+              const {item1,item2} = value;
+
               return (
                 <CCol xs style={{ marginRight: "5px" }}>
                   <CCard style={{ border: "0px" }} >
-                    <CCardImage onClick={() => {navigate("/menu",{ state: { initActiveTab: index } })}} orientation="top" src={item.img_url} style={{ width: "100px", height: "100px", backgroundColor: "gray", borderRadius: "50%", boxShadow: "0 4px 6px rgb(128, 128, 128)" }} />
+                    <CCardImage onClick={() => { navigate("/menu", { state: { initActiveTab: index } }) }} orientation="top" src={item1.img_url} style={{ width: "100px", height: "100px", backgroundColor: "gray", borderRadius: "50%", boxShadow: "0 4px 6px rgb(128, 128, 128)" }} />
                     <CCardBody style={{ width: "100%" }}>
-                      <CCardTitle className='card-title'>{item.name}</CCardTitle>
+                      <CCardTitle className='card-title'>{item1.name}</CCardTitle>
                     </CCardBody>
                   </CCard>
                   <CCard style={{ border: "0px" }} >
-                    <CCardImage orientation="top" src={item.img_url} style={{ width: "100px", height: "100px", backgroundColor: "gray", borderRadius: "50%", boxShadow: "0 4px 6px rgb(128, 128, 128)" }} />
+                    <CCardImage onClick={() => { if (item2.name!="Dessert" && item2.name!="Cake" )navigate("/menu", { state: { initActiveTab: index+3 } })}} orientation="top" src={item2.img_url} style={{ width: "100px", height: "100px", backgroundColor: "gray", borderRadius: "50%", boxShadow: "0 4px 6px rgb(128, 128, 128)" }} />
                     <CCardBody style={{ width: "100%" }}>
-                      <CCardTitle className='card-title'>{item.name}</CCardTitle>
+                      <CCardTitle className='card-title'>{item2.name}</CCardTitle>
                     </CCardBody>
                   </CCard>
-                </CCol> 
-                
+                </CCol>
+
               )
             })}
         </div>
-        )
+      )
   );
 };
 

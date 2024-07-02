@@ -17,7 +17,12 @@ const InvoiceItem = ({ item }) => {
 
 
 const Invoice = () => {
-
+  const [cartItems, setCartItems] = useState({});
+  useEffect(()=>(setCartItems(localStorage.getItem('cart')!=null? JSON.parse(localStorage.getItem('cart')):{})),[localStorage.getItem('cart')])
+  var Total=0.0;
+  Object.keys(cartItems).map((val)=>Total+=cartItems[val].price*(cartItems[val].count))
+  Total=(Math.round(Total * 100) / 100);
+  var finalTotal=0.0;
   const [bill, setBill] = useState([]);
   const billRequest = {
     inputs:
@@ -31,6 +36,11 @@ const Invoice = () => {
     useEffect(() => {
         if (billData) setBill(billData);
     }, [billData]);
+
+
+    finalTotal=Total+Total*(bill.GST-bill.discount)/100
+    finalTotal=(Math.round(finalTotal * 100) / 100);
+
  
 
 
@@ -38,21 +48,21 @@ const Invoice = () => {
     <div style={{backgroundColor:"white",padding:"10px",margin:"0px 5px" ,borderRadius:"20px",border: "1px solid #ccc"}}>
 
     <div className='cardFooter'>
-        <h5>Subtotal</h5>
-        <div>{bill.total}</div>
+        <h6>Subtotal</h6>
+        <div>${Total}</div>
     </div>
     <div className='cardFooter'>
-        <div><FaPercent/> Discount</div>
+        <div style={{display: "inline-flex",alignItems: "center"}}><FaPercent/><span style={{marginLeft:"5px"}} >Discount</span></div>
         <div style={{color:"green"}}>{bill.discount}%</div>
     </div>
     <div className='cardFooter'>
-        <div><FaBuildingColumns/> Tax and Charges</div>
-        <div>{bill.GST}</div>
+        <div style={{display: "inline-flex",alignItems: "center"}}><FaBuildingColumns /><span style={{marginLeft:"5px"}}> Tax and Charges</span></div>
+        <div>+{bill.GST}%</div>
     </div>
     <hr />
     <div className='cardFooter'>
-        <div>Grand Total</div>
-        <div>{bill.total-bill.discount-bill.GST}</div>
+        <h6>Grand Total</h6>
+        <div>${finalTotal}</div>
     </div>
     </div>
   );

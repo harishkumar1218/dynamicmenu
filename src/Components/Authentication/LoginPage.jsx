@@ -45,7 +45,7 @@ function LoginPage() {
         console.log(formData);
         try {
 
-            const response =  await axios.post('http://localhost:5000/auth', formData, {
+            const response =  await axios.post('https://dynamicmenu.onrender.com/auth', formData, {
                 headers: {
                   'Content-Type': 'application/json'
                 }
@@ -79,7 +79,7 @@ function LoginPage() {
       
               const userProfile = userInfoResponse.data;
 
-              const response =  await axios.post('http://localhost:5000/auth', userProfile, {
+              const response =  await axios.post('https://dynamicmenu.onrender.com/auth', userProfile, {
                 headers: {
                   'Content-Type': 'application/json'
                 }

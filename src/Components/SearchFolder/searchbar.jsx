@@ -1,11 +1,10 @@
-
+import axios from "axios";
 import React, { useEffect, useRef, useState } from 'react';
 import { FaIndianRupeeSign, FaSearchengin } from "react-icons/fa6";
 import { CNavbar, CInputGroup, CSpinner, CFormInput, CButton } from '@coreui/react'
 
-import './Search.css'
-import useCachedFetch from '../../customhooksFolder/useFetch';
-
+import './Search.css';
+import "../MenuFolder/menu.css";
 
 
 const FSearch = () => {
@@ -16,39 +15,44 @@ const FSearch = () => {
   const suggetionList = ["Biryani", "Panipuri", "Pizza"];
   const [searchResult, setSearch] = useState([]);
   const [, setState] = useState();
-  const [cartItems, setcartItems] = useState({});
+  const [cartItems, setCartItems] = useState({});
   const forceUpdate = () => setState({});
   const cardCountRefs = useRef({});
+  
 
-  const searchRequest = {
-    inputs:
-    {
-      restaurant_id: "66378cd6bed0587fd82cabb3",
-      user: "hari"
-    },
-    action: "search"
-  }
+  useEffect(()=>(setCartItems(window.localStorage.getItem('cart')!=null? JSON.parse(window.localStorage.getItem('cart')):{})),[window.localStorage.getItem('cart')])
 
-  const { data: searchData, loading: searchLoading, error: searchError } = useCachedFetch("data", searchRequest);
-  useEffect(() => {
-    if (searchData) setSearch(searchData);
-  }, [searchData]);
-
-
-  useEffect(() => {
+  useEffect( () => {
+    const find=async()=> {
     if (searchQueue) {
       setLoading(true);
-      fetch(`https://api.example.com/search?q=${searchQueue}`)
-        .then(response => response.json())
-        .then(data => {
-          setLoading(false);
-          console.log(data);
-        })
-        .catch(error => {
-          setLoading(false);
-          console.error('Error fetching data:', error);
+      
+      const searchRequest = {
+      
+        inputs:
+        {
+          restaurant_id: "6637aca14bfa08cf9527bfe5",
+          input: searchQueue
+        },
+        action: "search"
+      }
+
+      try {
+        const response = await axios.post("https://dynamicmenu.onrender.com/home", searchRequest, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
+        const searchResult = response.data;
+        setLoading(false)
+        if (searchResult) setSearch(searchResult);
+
+      } catch (error) {
+        console.log(error);
+      }
     }
+  }
+  find();
 
   }, [searchQueue]);
 
@@ -57,10 +61,11 @@ const FSearch = () => {
     cardCountRefs.current[index].count += 1;
     if (cartItems.hasOwnProperty(index)) {
       cartItems[index].count++;
-      setcartItems(cartItems);
+      setCartItems(cartItems);
     } else {
       cartItems[index] = { ...searchResult[index], count: 1 };
     }
+    window.localStorage.setItem("cart",JSON.stringify(cartItems));
     forceUpdate();
   };
 
@@ -72,7 +77,7 @@ const FSearch = () => {
         if (cartItems[index].count <= 0) {
           delete cartItems[index];
         }
-        setcartItems(cartItems);
+        setCartItems(cartItems);
       }
       forceUpdate();
     }
@@ -85,7 +90,7 @@ const FSearch = () => {
 
 
   return (
-    <div>
+    <div style={{marginBottom:120}}>
       <div>
         <CNavbar className="bg-body-tertiary" >
           <div className="container-fluid">
@@ -98,6 +103,7 @@ const FSearch = () => {
           </div>
         </CNavbar>
       </div>
+      <div >
       {
         (searchQueue == "") ?
           (
@@ -111,25 +117,23 @@ const FSearch = () => {
               </div>
             </div>
           ) :
-
-
-
           searchResult.map((value, index) => {
 
             const item = value;
             if (!cardCountRefs.current[index]) {
-              cardCountRefs.current[index] = { ref: null, count: 0 };
+              cardCountRefs.current[index] = { ref: null, count: cartItems[item.item_id]!=null?cartItems[item.item_id].count:0 };
             }
             const count = cardCountRefs.current[index].count;
             return (
               <div className="searchCard">
                 <img src={item.img_url} className="searchImage" alt="Card" />
                 <div className="searchCardDetails">
-                  <h3>{item.name}</h3>
-                  <p>{item.type}</p>
+                <h5>{item.name}</h5>
+                <p>{item.type=="non-veg"?<img width="35" height="35" src="https://img.icons8.com/color/48/non-vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>:<img width="35" height="35" src="https://img.icons8.com/color/48/vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>}{item.type}</p>
+                                    
                 </div>
                 <div className="searchCardFooter">
-                  <span style={{ fontWeight: "bold" }}><FaIndianRupeeSign />{item.price}</span>
+                  <span style={{ fontWeight: "bold" }}>${item.price}</span>
                   {(count === 0) ? (
                     <CButton className='AddButton' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(index)}>Add +</CButton>
                   ) : (
@@ -144,6 +148,7 @@ const FSearch = () => {
               </div>
             )
           })}
+        </div>
     </div>
   );
 }

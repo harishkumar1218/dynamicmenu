@@ -7,18 +7,19 @@ import './SearchFolder/Search.css'
 import useCachedFetch from '../customhooksFolder/useFetch';
 
 const FCart = () => {
-    const [cart, setCart] = useState([]);
     const [recomendedDeeserts, setRecommendedDesserts] = useState([]);
     const [, setState] = useState();
     const [cartItems, setCartItems] = useState({});
     const forceUpdate = () => setState({});
     const cardCountRefs = useRef({});
 
+    useEffect(() => (setCartItems(localStorage.getItem('cart') != null ? JSON.parse(localStorage.getItem('cart')) : {})), [localStorage.getItem('cart')])
 
-    const cartRequest = {
+
+    const uploadCartRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
             user: "hari"
         },
         action: "cart"
@@ -26,68 +27,60 @@ const FCart = () => {
     const recommendedRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
             user: "hari"
         },
         action: "cart_recommend"
     }
 
 
-    const { data: cartData, loading: populerLoading, error: populerError } = useCachedFetch("home", cartRequest);
-    useEffect(() => {
-        if (cartData) setCart(cartData);
-    }, [cartData]);
-
     const { data: recomendedData, loading: recomendedDataLoading, error: recomendedDataError } = useCachedFetch("home", recommendedRequest);
     useEffect(() => {
-        if (recomendedData) setRecommendedDesserts(recomendedData);
+        if (recomendedData) {
+            const tempCart = []
+            recomendedData.map((val) => {
+                if (!(val.item_id in cartItems)) { tempCart.push(val);}
+            })
+            setRecommendedDesserts(tempCart);
+        };
     }, [recomendedData]);
 
 
 
     const handleIncrement = (index, key) => {
-        console.log(index);
-        console.log(cardCountRefs);
+
         cardCountRefs.current[index].count += 1;
         if (cartItems.hasOwnProperty(index)) {
             cartItems[index].count++;
             setCartItems(cartItems);
-        } else {
-            cartItems[index] = { ...cart[index], count: 1 };
+            localStorage.setItem("cart", JSON.stringify(cartItems));
+
         }
+        // else {
+        //     cartItems[index] = { ...cart[key], count: 1 };
+        //     localStorage.setItem("cart",JSON.stringify(cartItems));
+        // }
         forceUpdate();
     };
 
 
     const handleDecrement = (index, key) => {
-        if (cardCountRefs.current[index]) {
+        const updatedCartItems = { ...cartItems };
+        if (cardCountRefs.current[index].count > 0) {
             cardCountRefs.current[index].count -= 1;
-            const newCartItems = { ...cartItems };
-
-            if (newCartItems[index]) {
-                newCartItems[index].count--;
-
-                if (newCartItems[index].count <= 0) {
-                    const newcart = [...cart];
-                    newcart.splice(key, 1);
-                    setCart(newcart);
-                    delete newCartItems[index];
-                    console.log(newCartItems);
-                } else {
-
-                    const newCart = cart.map((item) =>
-                        item.item_id === index ? { ...item, count: item.count - 1 } : item
-                    );
-
-                    setCart(newCart);
-                }
-                setCartItems(newCartItems);
-            }
         }
+        if (updatedCartItems[index] && updatedCartItems[index].count > 0) {
+            updatedCartItems[index].count -= 1;
+
+            if (updatedCartItems[index].count === 0) {
+                delete updatedCartItems[index];
+            }
+            setCartItems(updatedCartItems);
+            localStorage.setItem("cart", JSON.stringify(updatedCartItems));
+        }
+        forceUpdate();
     };
 
-
-    console.log(cartItems);
 
 
     const handleIncrementBeverages = (index, value, ind) => {
@@ -99,17 +92,7 @@ const FCart = () => {
             newCartItems[index.toString()] = { ...value, count: 1 };
         }
         setCartItems(newCartItems);
-
-        setCart((prevCart) => {
-            console.log(prevCart);
-            const itemInCart = prevCart?.find(item => item?.item_id === index);
-            if (itemInCart) {
-                return prevCart.map(item =>
-                    item.id === index ? { ...item, count: item.count + 1 } : item
-                );
-            }
-            return [...prevCart, { ...value, count: 1 }];
-        });
+        localStorage.setItem("cart", JSON.stringify(newCartItems));
 
         setRecommendedDesserts((prevDesserts) =>
             prevDesserts.filter((_, i) => i !== ind)
@@ -128,28 +111,29 @@ const FCart = () => {
             </CNavbar>
             <div>
                 {
-                    cart.map((value, index) => {
-                        const item = value;
-                        if (!cardCountRefs.current[item.item_id.toString()]) {
-                            cardCountRefs.current[item.item_id.toString()] = { ref: null, count: 0 };
+                    Object.keys(cartItems).map((key, index) => {
+                        const item = cartItems[key];
+                        if (!cardCountRefs.current[item.item_id]) {
+                            cardCountRefs.current[item.item_id] = { ref: null, count: cartItems[item.item_id] != null ? cartItems[item.item_id].count : 0 };
                         }
-                        const count = cartItems[item.item_id.toString()]?.count | 0;
+                        const count = cartItems[item.item_id]?.count | 0;
                         return (
                             <div className="searchCard">
                                 <img src={item.img_url} className="searchImage" alt="Card" />
                                 <div className="searchCardDetails">
-                                    <h3>{item.name}</h3>
-                                    <p>{item.type}</p>
+                                    <h5>{item.name}</h5>
+                                    <p>{item.type=="non-veg"?<img width="35" height="35" src="https://img.icons8.com/color/48/non-vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>:<img width="35" height="35" src="https://img.icons8.com/color/48/vegetarian-food-symbol.png" alt="non-vegetarian-food-symbol"/>}{item.type}</p>
+                                    
                                 </div>
                                 <div className="searchCardFooter">
-                                    <span style={{ fontWeight: "bold" }}><FaIndianRupeeSign />{item.price}</span>
+                                    <span style={{ fontWeight: "bold" }}>${item.price}</span>
                                     {(count == 0) ? (
                                         <CButton className='AddButton' style={{ backgroundColor: "red", borderRadius: "12px" }} color="danger" onClick={() => handleIncrement(item.item_id.toString(), index)}>Add +</CButton>
                                     ) : (
                                         <div style={{ color: "white", height: "40px" }} className="button-container">
-                                            <button style={{ backgroundColor: "transparent" }} onClick={() => handleDecrement(item.item_id.toString(), index)}>-</button>
+                                            <button style={{ backgroundColor: "transparent" }} onClick={() => handleDecrement(item.item_id, index)}>-</button>
                                             <span>{count}</span>
-                                            <button style={{ backgroundColor: "transparent" }} onClick={() => handleIncrement(item.item_id.toString(), index)}>+</button>
+                                            <button style={{ backgroundColor: "transparent" }} onClick={() => handleIncrement(item.item_id, index)}>+</button>
                                         </div>
                                     )
                                     }
@@ -167,8 +151,8 @@ const FCart = () => {
             <div className="scroll-container" style={{ backgroundColor: "white", borderRadius: "20px 0px 0px 20px", whiteSpace: "wrap", paddingTop: "10px", paddingLeft: "10px", marginLeft: "8px" }}>
                 {recomendedDeeserts.map((value, index) => {
                     const recomendedItem = value;
-                    if (!cardCountRefs.current[recomendedItem.item_id.toString()]) {
-                        cardCountRefs.current[recomendedItem.item_id.toString()] = { ref: null, count: 0 };
+                    if (!cardCountRefs.current[recomendedItem.item_id]) {
+                        cardCountRefs.current[recomendedItem.item_id] = { ref: null, count: 0 };
                     }
                     const count = 0;
                     return (
@@ -181,7 +165,7 @@ const FCart = () => {
                                     </div>
                                 </div>
                                 <CCardBody style={{ whiteSpace: "wrap", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "3px 0px 0px 3px", width: "100%", height: "auto" }}>
-                                    <div style={{ fontWeight: "bold", wordWrap: 'break-word', width: "50%" }}><FaIndianRupeeSign />{recomendedItem.price}  </div>
+                                    <div style={{ fontWeight: "bold", wordWrap: 'break-word', width: "50%" }}>${recomendedItem.price}  </div>
 
                                     {(count === 0) ? (
                                         <CButton style={{ marginBottom: "5px", fontWeight: "bold", boxShadow: "0 4px 6px rgb(150, 150, 150)", color: "white", width: "40%", height: "100%", backgroundColor: "red" }} onClick={() => handleIncrementBeverages(recomendedItem.item_id, value, index)} >Add</CButton>

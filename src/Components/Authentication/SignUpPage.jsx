@@ -14,7 +14,7 @@ function SignUpPage() {
     const signupRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
             user: "hari"
         },
         action: "auth_signup"
@@ -44,7 +44,7 @@ function SignUpPage() {
         console.log(formData);
         try {
 
-            const response =  await axios.post('http://localhost:5000/auth', formData, {
+            const response =  await axios.post('https://dynamicmenu.onrender.com/auth', formData, {
                 headers: {
                   'Content-Type': 'application/json'
                 }

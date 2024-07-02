@@ -15,7 +15,7 @@ function useCachedFetch(url, sendObj = {}, cacheTime = 300000) {
         // const cacheValid = isCacheValid(sendObj.action);
       
         // if (!cachedData || !cacheValid) {
-          const response = await axios.post('http://localhost:5000/home', sendObj, {
+          const response = await axios.post('https://dynamicmenu.onrender.com/home', sendObj, {
             headers: {
               'Content-Type': 'application/json'
             }

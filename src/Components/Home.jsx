@@ -15,24 +15,24 @@ const HomePage = () => {
     const populerRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
             user: "hari"
         },
-        action: "populer"
+        action: "popular"
     }
     const recommendedRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
-            user: "hari"
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
+            user_id:630
         },
         action: "recommended"
     }
     const comboRequest = {
         inputs:
         {
-            restaurant_id: "66378cd6bed0587fd82cabb3",
-            user: "hari"
+            restaurant_id: "6637aca14bfa08cf9527bfe5",
+            user_id:840
         },
         action: "combo"
 
@@ -53,6 +53,7 @@ const HomePage = () => {
     useLayoutEffect(() => {
         if (comboData) setCombo(comboData);
     }, [comboData]);
+    
 
 
 
@@ -98,10 +99,10 @@ const HomePage = () => {
                 </>
             }
 
-            {recomended ?
+            {comboData ?
                 (<>
                     <div style={{ textAlign: 'center' }}>Combos</div>
-                    <FPopulerItems itemList={recomended} />
+                    <FPopulerItems itemList={combo} />
                 </>
                 ) :
                 <>
@@ -114,8 +115,6 @@ const HomePage = () => {
                     </div>
                 </>
             }
-
-
         </div>
     );
 }

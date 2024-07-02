@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { CFooter, CButton, CBadge } from '@coreui/react'
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FaHouseChimney, FaBowlRice, FaCartShopping } from "react-icons/fa6";
-import useCachedFetch from '../../customhooksFolder/useFetch';
+
 
 
 const FFooter = () => {
     const navigate = useNavigate();
-    const [ cart, setCartItems ] = useState([]);
-    const [cartCount, setcartCount] = useState(0);
+    const [ cart, setCartItems ] = useState({});
+    const [cartCount, setCartCount] = useState(0);
     const homeRef = useRef(null);
     const menuRef = useRef(null);
     const cartRef = useRef(null);
@@ -22,14 +22,40 @@ const FFooter = () => {
         },
         action: "cart"
     }
-
-    const { data: cartData, loading: populerLoading, error: populerError } = useCachedFetch("home", cartRequest);
     useEffect(() => {
-        if (cartData) setCartItems(cartData);
-    }, [cartData]);
+        // Function to update cart items from localStorage
+        const updateCartFromLocalStorage = () => {
+            const storedCart = localStorage.getItem('cart');
+            if (storedCart !== null) {
+                setCartItems(JSON.parse(storedCart));
+            } else {
+                setCartItems({});
+            }
+        };
+
+        // Call the update function initially to sync with localStorage
+        updateCartFromLocalStorage();
+
+        // Function to handle localStorage change event
+        const handleStorageChange = (event) => {
+            if (event.key === 'cart') {
+                updateCartFromLocalStorage();
+            }
+        };
+
+        // Add event listener for localStorage change
+        window.addEventListener('storage', handleStorageChange);
+
+        // Cleanup function to remove event listener
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, [localStorage.getItem('cart')]);
+
+
 
     useEffect(() => {
-        setcartCount(cart?.length);
+        setCartCount(Object.keys(cart).length);
     }, [cart])
 
     return (
@@ -56,7 +82,7 @@ const FFooter = () => {
                     ) : null}
                 </CButton>
             </div>
-            
+
         </CFooter>
     );
 }
